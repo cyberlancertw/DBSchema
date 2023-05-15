@@ -1,0 +1,43 @@
+﻿body{
+    font-family: '微軟正黑體';
+}
+#serverForm {
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    width: 300px;
+    height: 380px;
+    border-radius: 1rem;
+    background-color: #9bd5ff;
+    box-shadow: 0 0 8px #c3c3c3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#serverForm > *{
+    width: 70%;
+}
+h1 {
+    color: #434343;
+}
+select{
+    line-height: 1.5;
+    padding: 0.3rem;
+}
+label{
+    color: #434343;
+    font-weight: 900;
+}
+input{
+    line-height: 1.5;
+    border-radius: 0.3rem;
+    padding: 0.3rem;
+    border: 1px solid gray;
+}
+input:active{
+    border-color: blue;
+}
+button{
+    margin-top: 1rem;
+}
