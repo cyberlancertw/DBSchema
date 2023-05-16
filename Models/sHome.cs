@@ -43,7 +43,9 @@ namespace DBSchema.Models
 
                 using(var conn = db.Connection(server, null, user, pwd))
                 {
-                    sql = "SELECT [name] AS [DatabaseName], [dbid] AS [DatabaseID] FROM [master].[dbo].[sysdatabases] WHERE [dbid] > 4";
+                    sql = "SELECT D.[name] AS [DatabaseName], D.[database_id] AS [DatabaseID], D.[create_date] AS [CreateTime], "
+                        + "CAST(SUM(F.size) * 8.0 / 1024 AS DECIMAL(10,2)) AS [UsedStorage] FROM sys.databases AS D JOIN sys.master_files AS F "
+                        + "ON D.[database_id] = F.[database_id] WHERE D.database_id > 4 AND D.[name] LIKE '%" + query.QName + "%' GROUP BY D.[name], D.[database_id], D.[create_date]";
                     sql = CyTool.QueryWithPage(sql, query.Config);
                     qryResult = conn.Query<Database>(sql).ToList();
                     info.ObjectData = qryResult;

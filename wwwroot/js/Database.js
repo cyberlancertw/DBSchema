@@ -11,13 +11,36 @@
             ColumnName: '資料庫名稱',
             DataName: 'databaseName',
             SortType: 'DatabaseName'
+        },
+        {
+            ColumnName: '已使用空間',
+            DataName: 'usedStorage',
+            SortType: 'UsedStorage',
+            Getter: function (item) {
+                return item.usedStorage + ' MB';
+            }
+        },
+        {
+            ColumnName: '建立時間',
+            DataName: 'createTime',
+            SortType: 'CreateTime',
+            Getter: function (item) {
+                let t = new Date(item.createTime);
+                let y = t.getFullYear();
+                let M = t.getMonth() > 8 ? (t.getMonth() + 1) : '0' + (t.getMonth() + 1);
+                let d = t.getDate() > 9 ? t.getDate() : '0' + t.getDate();
+                let h = t.getHours() > 9 ? t.getHours() : '0' + t.getHours();
+                let m = t.getMinutes() > 9 ? t.getMinutes() : '0' + t.getMinutes();
+                let s = t.getSeconds() > 9 ? t.getSeconds() : '0' + t.getSeconds();
+                return y + '-' + M + '-' + d + " " + h + ":" + m + ":" + s;
+            }
         }
     ],
     Page: {
         Enable: true,
-        PageSize: 10,
+        PageSize: 15,
         PageSizeSelect: [5, 10, 15],
-        PositionUp: false
+        PositionUp: true
     },
     Sort: {
         SortDefaultEnable: true,
@@ -27,17 +50,38 @@
     Event: {
         Read: {
             Url: '/Home/QueryDatabase',
-            //QueryData: ReadStudents
+            QueryData: GetQueryName
         },
-        RowSelect: function (item, datas) {
+        RowSelect: function (item) {
+            document.getElementById('databaseName').value = item.databaseName;
+            document.getElementById('btnSelect').removeAttribute('disabled');
+        },
+        RowDeselect: function (item) {
             console.log(item);
-            console.log(datas);
-        },
+            document.getElementById('databaseName').removeAttribute('value');
+            document.getElementById('btnSelect').setAttribute('disabled', true);
+        }
     },
     MultiSelect: false
 }
 
-
+function GetQueryName() {
+    return {
+        QName: document.getElementById('queryDatabase').value
+    };
+}
 window.addEventListener('load', function () {
     CyGrid.Render('gridDatabase', databaseSchema);
+    document.getElementById('btnBack').addEventListener('click', function () {
+        location.href = '/Home/';
+    });
+    document.getElementById('btnQuery').addEventListener('click', function () {
+        CyGrid.Read('gridDatabase');
+    });
+    this.document.getElementById('btnSelect').addEventListener('click', function () {
+        console.log('!');
+        if (document.getElementById('databaseName').value)
+            document.getElementById('formDatabase').submit();
+    });
+    document.getElementById('queryDatabase').focus();
 });

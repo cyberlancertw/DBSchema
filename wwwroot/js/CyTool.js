@@ -521,8 +521,8 @@ function CyGridFill(GridID, FillData) {
                         // 設定選到的主鍵
                         config.selected = '';
                         // 取消選取的自訂 callback
-                        if (schema && schema.Event && schema.Event.RowSelect) {
-                            schema.Event.RowSelect(item, FillData);
+                        if (schema && schema.Event && schema.Event.RowDeselect) {
+                            schema.Event.RowDeselect(item, FillData);
                         }
                     }
                     else {

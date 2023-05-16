@@ -12,6 +12,7 @@
         public class QueryDatabase
         {
             public CyGridConfig Config { get; set; }
+            public string QName { get; set; }
         }
     }
 }

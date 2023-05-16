@@ -41,10 +41,24 @@ namespace DBSchema.Controllers
             return Json(new { success = info.Success, message = info.Message });
         }
 
+        [HttpPost]
         public IActionResult Database()
         {
             if (HttpContext.Session.GetString("ServerName") == null)
                 return RedirectToAction("Index");
+            if (HttpContext.Session.GetString("Catalog") != null)
+                HttpContext.Session.Remove("Catalog");
+            TempData["Server"] = HttpContext.Session.GetString("ServerName");
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Table(string databaseName)
+        {
+            if (string.IsNullOrEmpty(databaseName) || HttpContext.Session.GetString("ServerName") == null)
+                return RedirectToAction("Index");
+            HttpContext.Session.SetString("Catalog", databaseName);
+            TempData["Catalog"] = databaseName;
             return View();
         }
 
