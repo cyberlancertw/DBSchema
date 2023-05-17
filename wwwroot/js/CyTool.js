@@ -396,7 +396,7 @@ function CyGridRead(GridID, Url, QueryData) {
                 }
             }
             else {
-                alert('!?');// alert
+                CyModal.Alert(result.message, 'L');
             }
         })
         .then(function () {

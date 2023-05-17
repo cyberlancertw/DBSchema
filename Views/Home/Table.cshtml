@@ -5,5 +5,19 @@
 <link rel="stylesheet" href="~/css/Table.css" asp-append-version="true" />
 <script src="~/js/CyTool.js" asp-append-version="true"></script>
 <script src="~/js/Table.js" asp-append-version="true"></script>
+<form method="post" action="/Home/Column/" id="formTable">
+    <input type="hidden" name="tableName" id="tableName" value="" />
+    <input type="hidden" name="tableID" id="tableID" value="" />
+</form>
+<form method="post" action="/Home/Database/" id="formBack">
+</form>
+<div id="divTop">
+    <div><input type="text" id="queryTable" value="" placeholder="查詢資料表名稱" /><button class="cy-button btn-blue" id="btnQuery">查詢</button></div>
+    <div><span id="spanDatabase">資料庫：@TempData["Catalog"]</span></div>
+</div>
+<div>
+    <button class="cy-button btn-red" id="btnBack">返回</button>
+    <button class="cy-button btn-yellow" id="btnModifiy" disabled>修改</button>
+    <button class="cy-button btn-green" id="btnSelect" disabled>選擇</button>
+</div>
 <div id="gridTable"></div>
-<h1>@TempData["Catalog"]</h1>

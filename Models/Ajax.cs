@@ -14,5 +14,16 @@
             public CyGridConfig Config { get; set; }
             public string QName { get; set; }
         }
+        public class QueryTable
+        {
+            public CyGridConfig Config { get; set; }
+            public string QName { get; set; }
+        }
+        public class QueryColumn
+        {
+            public CyGridConfig Config { get; set; }
+            public string QName { get; set; }
+            public int TableID { get; set; }
+        }
     }
 }

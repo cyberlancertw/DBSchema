@@ -63,6 +63,18 @@ namespace DBSchema.Controllers
         }
 
         [HttpPost]
+        public IActionResult Column(string tableName, string tableID)
+        {
+            if (HttpContext.Session.GetString("ServerName") == null)
+                return RedirectToAction("Index");
+            TempData["Catalog"] = HttpContext.Session.GetString("Catalog");
+            TempData["Table"] = tableName;
+            TempData["TableID"] = tableID;
+            return View();
+        }
+
+
+        [HttpPost]
         public JsonResult QueryDatabase([FromBody] Ajax.QueryDatabase query)
         {
             SqlInfo info = new SqlInfo();
@@ -72,7 +84,35 @@ namespace DBSchema.Controllers
                 HttpContext.Session.GetString("Password"),
                 query,
                 info);
-            return Json(new { success = info.Success, data = info.ObjectData });
+            return Json(new { success = info.Success, data = info.ObjectData, message = info.Message });
+        }
+
+        [HttpPost]
+        public JsonResult QueryTable([FromBody] Ajax.QueryTable query)
+        {
+            SqlInfo info = new SqlInfo();
+            service.QueryTable(
+                HttpContext.Session.GetString("ServerName"),
+                HttpContext.Session.GetString("UserName"),
+                HttpContext.Session.GetString("Password"),
+                HttpContext.Session.GetString("Catalog"),
+                query,
+                info);
+            return Json(new { success = info.Success, data = info.ObjectData, message = info.Message });
+        }
+
+        [HttpPost]
+        public JsonResult QueryColumn([FromBody] Ajax.QueryColumn query)
+        {
+            SqlInfo info = new SqlInfo();
+            service.QueryColumn(
+                HttpContext.Session.GetString("ServerName"),
+                HttpContext.Session.GetString("UserName"),
+                HttpContext.Session.GetString("Password"),
+                HttpContext.Session.GetString("Catalog"),
+                query,
+                info);
+            return Json(new { success = info.Success, data = info.ObjectData, message = info.Message });
         }
     }
 }
