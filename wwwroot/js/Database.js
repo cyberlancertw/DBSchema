@@ -63,6 +63,10 @@
         PageReadDone: function () {
             document.getElementById('databaseName').removeAttribute('value');
             document.getElementById('btnSelect').setAttribute('disabled', true);
+        },
+        RowDoubleClick: function (item) {
+            document.getElementById('databaseName').value = item.databaseName;
+            document.getElementById('formDatabase').submit();
         }
     },
     MultiSelect: false
@@ -81,10 +85,14 @@ window.addEventListener('load', function () {
     document.getElementById('btnQuery').addEventListener('click', function () {
         CyGrid.Read('gridDatabase');
     });
-    this.document.getElementById('btnSelect').addEventListener('click', function () {
+    document.getElementById('btnSelect').addEventListener('click', function () {
         console.log('!');
         if (document.getElementById('databaseName').value)
             document.getElementById('formDatabase').submit();
+    });
+    document.getElementById('queryDatabase').addEventListener('keyup', function () {
+        if (event.key == 'Enter')
+            document.getElementById('btnQuery').click();
     });
     document.getElementById('queryDatabase').focus();
 });

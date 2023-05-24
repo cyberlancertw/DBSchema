@@ -65,6 +65,11 @@
             document.getElementById('tableName').removeAttribute('value');
             document.getElementById('tableID').removeAttribute('value');
             document.getElementById('btnSelect').setAttribute('disabled', true);
+        },
+        RowDoubleClick: function (item) {
+            document.getElementById('tableName').value = item.tableName;
+            document.getElementById('tableID').value = item.tableID;
+            document.getElementById('formTable').submit();
         }
     },
     MultiSelect: false
@@ -83,9 +88,13 @@ window.addEventListener('load', function () {
     document.getElementById('btnQuery').addEventListener('click', function () {
         CyGrid.Read('gridTable');
     });
-    this.document.getElementById('btnSelect').addEventListener('click', function () {
+    document.getElementById('btnSelect').addEventListener('click', function () {
         if (document.getElementById('tableName').value && document.getElementById('tableID').value)
             document.getElementById('formTable').submit();
+    });
+    document.getElementById('queryTable').addEventListener('keyup', function () {
+        if (event.key == 'Enter')
+            document.getElementById('btnQuery').click();
     });
     document.getElementById('queryTable').focus();
 });

@@ -2,14 +2,20 @@
     display:flex;
     justify-content:space-between;
 }
-#divTop > div > input{
-    line-height: 1.5;
-    height: 2rem;
+#divQuery{
+    display: flex;
+    align-items: center;
+}
+#divQuery > input{
+    font-size: 1rem;
+    line-height: 1.7;
+    height: 2.3rem;
+    width: 30rem;
     border-radius: 0.3rem;
     margin: 0.4rem;
     padding: 0.3rem;
 }
-#spanServer{
+#divInfo > span{
     font-size: 24px;
     font-weight: 900;
 }

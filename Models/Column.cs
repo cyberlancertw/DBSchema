@@ -12,6 +12,7 @@
         public bool IsIdentity { get; set; }
         public string DefaultValue { get; set; }
         public string IndexName { get; set; }
+        public bool IsPrimaryKey { get; set; }
         public int datacount { get; set; }
     }
 }

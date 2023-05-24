@@ -63,14 +63,6 @@
             }
         },
         {
-            ColumnName: '空值',
-            DataName: 'isNull',
-            Width: 80,
-            Getter: function (item) {
-                return item.isNull ? '可' : '不可';
-            }
-        },
-        {
             ColumnName: '預設值',
             DataName: 'defaultValue',
             Width: 80,
@@ -79,11 +71,44 @@
             }
         },
         {
+            ColumnName: '空值',
+            DataName: 'isNull',
+            Width: 80,
+            Getter: function (item) {
+                return item.isNull ? '可' : '不可';
+            }
+        },
+        {
             ColumnName: '索引',
             DataName: 'indexName',
             Width: 80,
             Getter: function (item) {
                 return item.indexName;
+            }
+        },
+        {
+            ColumnName: '自動遞增',
+            DataName: 'isIdentity',
+            Width: 80,
+            Getter: function (item) {
+                if (item.isIdentity) return '識別';
+                else return '';
+            }
+        },
+        {
+            ColumnName: '主鍵',
+            DataName: 'isPrimaryKey',
+            Width: 80,
+            Getter: function (item) {
+                if (item.isPrimaryKey) {
+                    let docFrag = document.createDocumentFragment();
+                    let span = document.createElement('span');
+                    docFrag.appendChild(span);
+                    span.setAttribute('style', 'font-weight:900;color:red;');
+                    span.appendChild(document.createTextNode('PK'));
+                    return docFrag;
+                }
+                else return '';
             }
         }
     ],
@@ -130,6 +155,9 @@ window.addEventListener('load', function () {
     document.getElementById('btnQuery').addEventListener('click', function () {
         CyGrid.Read('gridColumn');
     });
-    
+    document.getElementById('queryColumn').addEventListener('keyup', function () {
+        if (event.key == 'Enter')
+            document.getElementById('btnQuery').click();
+    })
     document.getElementById('queryColumn').focus();
 });

@@ -108,11 +108,15 @@ namespace DBSchema.Models
 
                 using (var conn = db.Connection(server, catalog, user, pwd))
                 {
-                    sql = "SELECT C.[name] AS [ColumnName], (CAST(C.[object_id] AS VARCHAR) + '_' + CAST(C.[column_id] AS VARCHAR)) AS [ColumnID], P.[value] AS [Description], "
-                        + "C.[system_type_id] AS [DataType], C.[max_length] AS [DataLength], C.[is_nullable] AS [IsNull], " 
-                        + "C.[is_identity] AS [IsIdentity], D.[definition] AS [DefaultValue] FROM sys.columns AS C LEFT JOIN "
-                        + "sys.extended_properties AS P ON C.[column_id] = P.[minor_id] AND P.[major_id] = @tableid LEFT JOIN "
-                        + "sys.default_constraints D ON C.[default_object_id] = D.[object_id] WHERE C.[object_id] = @tableid AND C.[name] LIKE @qname";
+                    sql = "SELECT DISTINCT C.[name] AS [ColumnName], C.[column_id] as [ColumnID], P.[value] AS[Description], C.[system_type_id] AS[DataType], C.[max_length] AS[DataLength], C.[is_nullable] AS[IsNull], " 
+                        + "C.[is_identity] AS[IsIdentity], D.[definition] AS[DefaultValue], CASE MAX(CAST(X.[is_primary_key] AS INT)) WHEN 1 THEN 1 ELSE NULL END AS[IsPrimaryKey], " 
+                        + "STUFF((SELECT distinct ',' + ID.[name] FROM sys.index_columns AS IC LEFT JOIN sys.indexes AS ID ON IC.[index_id] = ID.[index_id] AND IC.[object_id] = ID.[object_id] "
+                        + "WHERE IC.[object_id] = I.[object_id] and IC.[column_id] = C.[column_id] FOR XML PATH('')), 1, 1, '') AS[IndexName] FROM sys.columns AS C "
+                        + "LEFT JOIN sys.extended_properties AS P ON C.[column_id] = P.[minor_id] AND C.[object_id] = P.[major_id] "
+                        + "LEFT JOIN sys.default_constraints AS D ON C.[default_object_id] = D.[object_id] "
+                        + "LEFT JOIN sys.index_columns AS I ON C.[object_id] = I.[object_id] AND C.[column_id] = I.[column_id] "
+                        + "LEFT JOIN sys.indexes AS X ON I.[object_id] = X.[object_id] AND I.[index_id] = X.[index_id] "
+                        + "WHERE C.[object_id] = @tableid AND C.[name] LIKE @qname GROUP BY C.[name],C.[column_id],P.[value],C.[system_type_id],C.[max_length],C.[is_nullable],C.[is_identity],D.[definition],I.[object_id],I.[column_id]";
                     sql = CyTool.QueryWithPage(sql, query.Config);
                     DynamicParameters para = new DynamicParameters();
                     para.Add("tableid", query.TableID);
