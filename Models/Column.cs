@@ -11,6 +11,7 @@
         public bool IsNull { get; set; }
         public bool IsIdentity { get; set; }
         public string DefaultValue { get; set; }
+        public string IndexName { get; set; }
         public int datacount { get; set; }
     }
 }

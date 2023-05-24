@@ -4,9 +4,12 @@
 
 <link rel="stylesheet" href="~/css/CyTool.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Index.css" asp-append-version="true" />
+<script>
+    var pathBase = '@(Context.Request.PathBase)';
+</script>
 <script src="~/js/CyTool.js" asp-append-version="true"></script>
 <script src="~/js/Index.js" asp-append-version="true"></script>
-<form method="post" action="/Home/Database/" id="formConnect">
+<form method="post" action="~/Home/Database/" id="formConnect">
     <div id="serverForm">
         <h1>DB Schema</h1>
         <label for="ServerAuth">驗證：</label>

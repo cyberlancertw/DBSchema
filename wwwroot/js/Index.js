@@ -34,7 +34,7 @@ function textKeyUp(e){
 function checkValid(e) {
     e.preventDefault();
     CyLoading.Start();
-    fetch('/Home/CheckValid/', {
+    fetch(pathBase + '/Home/CheckValid/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(GetData()),

@@ -25,7 +25,7 @@
 }
 
 /* 表格標題列欄位靠左 */
-.grid-th-left {
+.grid-th-left{
     text-align: left;
 }
 
@@ -66,6 +66,7 @@
 /* 表格資料中的列 */
 .grid-row {
     cursor: pointer;
+
 }
 
 /* 表格資料列的懸停樣式 */
@@ -161,7 +162,8 @@
 }
 
 /* 彈窗 alert 最外層*/
-.cy-modal-alert {
+.cy-modal-alert{
+    
 }
 /* 彈窗背景*/
 .cy-modal-background {
@@ -182,7 +184,7 @@
     z-index: 99997;
     background-color: #ffffff;
     border-radius: 1rem;
-    box-shadow: 0 0 10px #404040;
+    box-shadow: 0 0 10px #404040 ;
     transform: translate(-50%,-50%);
     animation-name: modalPop;
     animation-duration: 0.3s;
@@ -194,7 +196,6 @@
         width: 200px;
         height: 200px;
     }
-
     to {
     }
 }
@@ -208,7 +209,7 @@
 }
 
 /* 彈窗標題列*/
-.cy-modal-title {
+.cy-modal-title{
     text-align: center;
     height: 1.5rem;
     padding: 0.8rem;
@@ -221,7 +222,7 @@
 }
 
 /*彈窗 alert 底部列*/
-.cy-modal-alert-footer {
+.cy-modal-alert-footer{
     padding: 0.8rem;
     display: flex;
     justify-content: center;
@@ -244,15 +245,15 @@
     border-style: solid;
     padding: 0.375rem 0.75rem;
     border-radius: 0.4rem;
+    display: inline-flex;
+    align-items: center;
 }
 
 /* 按鈕取消共通樣式*/
-.cy-button:disabled {
+.cy-button:disabled{
     cursor: not-allowed;
     opacity: 0.5;
 }
-
-
 
 /* 彈窗 alert 按鈕*/
 .cy-modal-alert-button {
@@ -325,6 +326,11 @@
     border-right-color: #5bb5df;
     border-bottom-color: #5bb5df;
     border-left-color: #1b759f;
+}
+
+/* 圖示預設隱藏 */
+i[data-size]{
+    display:none;
 }
 
 /* 藍色按鈕*/
@@ -553,4 +559,72 @@
     border-right-color: #dcdad2;
     border-bottom-color: #dcdad2;
     border-left-color: #ffffff;
+}
+
+/* 紫色按鈕 */
+.btn-purple {
+    color: #000000;
+    background-color: #b98cc3;
+    border-top-color: #d9a8e3;
+    border-right-color: #996ca3;
+    border-bottom-color: #996ca3;
+    border-left-color: #d9a8e3;
+}
+
+/* 紫色按鈕懸停 */
+.btn-purple:hover {
+    background-color: #996ca3;
+    border-color: #996ca3;
+}
+
+/* 紫色按鈕點擊 */
+.btn-purple:active {
+    background-color: #996ca3;
+    border-top-color: #794c83;
+    border-right-color: #b98cc3;
+    border-bottom-color: #b98cc3;
+    border-left-color: #794c83;
+}
+
+/* 紫色按鈕取消 */
+.btn-purple:disabled {
+    background-color: #b98cc3;
+    border-top-color: #d9a8e3;
+    border-right-color: #996ca3;
+    border-bottom-color: #996ca3;
+    border-left-color: #d9a8e3;
+}
+
+/* 橘色按鈕 */ 
+.btn-orange {
+    color: #000000;
+    background-color: #e9bb52;
+    border-top-color: #ffdb72;
+    border-right-color: #c99b32;
+    border-bottom-color: #c99b32;
+    border-left-color: #ffdb72;
+}
+
+/* 橘色按鈕懸停 */ 
+.btn-orange:hover {
+    background-color: #996ca3;
+    border-color: #996ca3;
+}
+
+/* 橘色按鈕點擊 */ 
+.btn-orange:active {
+    background-color: #996ca3;
+    border-top-color: #794c83;
+    border-right-color: #b98cc3;
+    border-bottom-color: #b98cc3;
+    border-left-color: #794c83;
+}
+
+/* 橘色按鈕取消 */ 
+.btn-orange:disabled {
+    background-color: #b98cc3;
+    border-top-color: #d9a8e3;
+    border-right-color: #996ca3;
+    border-bottom-color: #996ca3;
+    border-left-color: #d9a8e3;
 }

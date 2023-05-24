@@ -52,7 +52,7 @@
     },
     Event: {
         Read: {
-            Url: '/Home/QueryTable',
+            Url: pathBase + '/Home/QueryTable',
             QueryData: GetQueryName
         },
         RowSelect: function (item) {

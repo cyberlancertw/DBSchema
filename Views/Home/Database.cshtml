@@ -3,19 +3,22 @@
 }
 <link rel="stylesheet" href="~/css/CyTool.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Database.css" asp-append-version="true" />
+<script>
+    var pathBase = '@(Context.Request.PathBase)';
+</script>
 <script src="~/js/CyTool.js" asp-append-version="true"></script>
 <script src="~/js/Database.js" asp-append-version="true"></script>
-<form method="post" action="/Home/Table/" id="formDatabase">
+<form method="post" action="~/Home/Table/" id="formDatabase">
     <input type="hidden" name="databaseName" id="databaseName" value="" />
 </form>
 <div id="divTop">
     
-    <div><input type="text" id="queryDatabase" value="" placeholder="查詢資料庫名稱" /><button class="cy-button btn-blue" id="btnQuery">查詢</button></div>
+    <div><input type="text" id="queryDatabase" value="" placeholder="查詢資料庫名稱" /><button class="cy-button btn-blue" id="btnQuery"><i data-size="1">zoom</i>查詢</button></div>
     <div><span id="spanServer">伺服器：@TempData["Server"]</span></div>
 </div>
 <div>
-    <button class="cy-button btn-red" id="btnBack">返回</button>
-    <button class="cy-button btn-yellow" id="btnModifiy" disabled>修改</button>
-    <button class="cy-button btn-green" id="btnSelect" disabled>選擇</button>
+    <button class="cy-button btn-red" id="btnBack"><i data-size="1">undo</i>返回</button>
+    <button class="cy-button btn-yellow" id="btnModifiy" disabled><i data-size="1">pencil</i>修改</button>
+    <button class="cy-button btn-green" id="btnSelect" disabled><i data-size="1">check</i>選擇</button>
 </div>
 <div id="gridDatabase"></div>

@@ -12,32 +12,36 @@ namespace DBSchema.Models
 
         public IDbConnection Connection(string server, string? catalog, string? user, string? pwd)
         {
+            String injection = "integrated security";
+            if ((server.ToLower().IndexOf(injection) > -1) ||
+                (user != null && user.ToLower().IndexOf(injection) > -1) ||
+                (pwd != null && pwd.ToLower().IndexOf(injection) > -1))
+                throw new Exception("連線異常");
             return new SqlConnection(GetConnectionString(server, catalog, user, pwd));
         }
         private string GetConnectionString(string server, string? catalog, string? user, string? pwd)
         {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
             if (server.Equals("."))
             {
-                if(catalog == null || catalog.Equals(""))
+                builder.IntegratedSecurity = true;
+                if(catalog != null && !catalog.Equals(""))
                 {
-                    return "Data Source=.;Integrated Security=True";
-                }
-                else
-                {
-                    return "Data Source=.;Initial Catalog=" + catalog + ";Integrated Security=True";
+                    builder.InitialCatalog = catalog;
                 }
             }
             else
             {
-                if (catalog == null || catalog.Equals(""))
+                builder.IntegratedSecurity= false;
+                builder.DataSource = server;
+                builder.UserID = user;
+                builder.Password = pwd;
+                if (catalog != null && !catalog.Equals(""))
                 {
-                    return "Data Source=" + server + ";User ID=" + user + ";Password=" + pwd;
-                }
-                else
-                {
-                    return "Data Source=" + server + ";Initial Catalog=" + catalog + ";User ID=" + user + ";Password=" + pwd;
+                    builder.InitialCatalog = catalog;
                 }
             }
+            return builder.ToString();
         }
     }
 }

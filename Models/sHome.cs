@@ -79,7 +79,7 @@ namespace DBSchema.Models
                 {
                     sql = "SELECT T.[name] AS [TableName], T.[object_id] AS [TableID], P.[value] AS [Description], T.[max_column_id_used] AS [ColumnCount], "
                         + "T.[create_date] AS [CreateTime] FROM sys.tables AS T LEFT JOIN sys.extended_properties AS P ON T.[object_id] = P.[major_id] "
-                        + "AND P.[minor_id] = 0 WHERE T.[name] LIKE @qname";
+                        + "AND P.[minor_id] = 0 AND P.[name] = 'MS_Description' WHERE T.[name] LIKE @qname";
                     sql = CyTool.QueryWithPage(sql, query.Config);
                     DynamicParameters para = new DynamicParameters();
                     para.Add("qname", query.QName);

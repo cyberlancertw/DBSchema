@@ -49,7 +49,7 @@
     },
     Event: {
         Read: {
-            Url: '/Home/QueryDatabase',
+            Url: pathBase + '/Home/QueryDatabase',
             QueryData: GetQueryName
         },
         RowSelect: function (item) {
@@ -57,7 +57,10 @@
             document.getElementById('btnSelect').removeAttribute('disabled');
         },
         RowDeselect: function (item) {
-            console.log(item);
+            document.getElementById('databaseName').removeAttribute('value');
+            document.getElementById('btnSelect').setAttribute('disabled', true);
+        },
+        PageReadDone: function () {
             document.getElementById('databaseName').removeAttribute('value');
             document.getElementById('btnSelect').setAttribute('disabled', true);
         }
@@ -73,7 +76,7 @@ function GetQueryName() {
 window.addEventListener('load', function () {
     CyGrid.Render('gridDatabase', databaseSchema);
     document.getElementById('btnBack').addEventListener('click', function () {
-        location.href = '/Home/';
+        location.href = pathBase + '/Home/';
     });
     document.getElementById('btnQuery').addEventListener('click', function () {
         CyGrid.Read('gridDatabase');

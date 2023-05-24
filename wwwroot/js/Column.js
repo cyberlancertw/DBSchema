@@ -50,8 +50,12 @@
                     case 48: return '0 至 255';
                     case 56: return '-2,147,483,648 至 2,147,483,647';
                     case 104: return '0 至 1';
-                    case 167: return '0 至 ' + item.dataLength;
-                    case 231: return '0 至 ' + item.dataLength / 2;
+                    case 167:
+                        if (item.dataLength < 0) return '0 至 MAX';
+                        else return '0 至 ' + item.dataLength;
+                    case 231:
+                        if (item.dataLength < 0) return '0 至 MAX';
+                        else return '0 至 ' + item.dataLength / 2;
                     case 239: return item.dataLength / 2;
                     default: return item.dataLength;
                 }
@@ -63,7 +67,23 @@
             DataName: 'isNull',
             Width: 80,
             Getter: function (item) {
-                return item.isNull ? '可' : '';
+                return item.isNull ? '可' : '不可';
+            }
+        },
+        {
+            ColumnName: '預設值',
+            DataName: 'defaultValue',
+            Width: 80,
+            Getter: function (item) {
+                return item.defaultValue;
+            }
+        },
+        {
+            ColumnName: '索引',
+            DataName: 'indexName',
+            Width: 80,
+            Getter: function (item) {
+                return item.indexName;
             }
         }
     ],
@@ -80,7 +100,7 @@
     },
     Event: {
         Read: {
-            Url: '/Home/QueryColumn',
+            Url: pathBase + '/Home/QueryColumn',
             QueryData: GetQueryName
         },
         RowSelect: function (item) {
