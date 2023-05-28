@@ -7,6 +7,7 @@
         public DateTime CreateTime { get; set; }
         public string Description { get; set; }
         public int ColumnCount { get; set; }
+        public string Schema { get; set; }
         public int datacount { get; set; }
     }
 }

@@ -63,13 +63,14 @@ namespace DBSchema.Controllers
         }
 
         [HttpPost]
-        public IActionResult Column(string tableName, string tableID)
+        public IActionResult Column(string tableName, string tableID, string tableSchema)
         {
             if (HttpContext.Session.GetString("ServerName") == null)
                 return RedirectToAction("Index");
             TempData["Catalog"] = HttpContext.Session.GetString("Catalog");
             TempData["Table"] = tableName;
             TempData["TableID"] = tableID;
+            TempData["TableSchema"] = tableSchema;
             return View();
         }
 
@@ -113,6 +114,54 @@ namespace DBSchema.Controllers
                 query,
                 info);
             return Json(new { success = info.Success, data = info.ObjectData, message = info.Message });
+        }
+
+        [HttpPost]
+        public JsonResult GetTableDescription([FromBody] Ajax.QueryTableDescription model)
+        {
+            SqlInfo Info = new SqlInfo();
+            model.Server = HttpContext.Session.GetString("ServerName");
+            model.User = HttpContext.Session.GetString("UserName");
+            model.Pwd = HttpContext.Session.GetString("Password");
+            model.Catalog = HttpContext.Session.GetString("Catalog");
+            service.GetTableDescription(model, Info);
+            return Json(new { success = Info.Success, data = Info.StringData, message = Info.Message });
+        }
+
+        [HttpPost]
+        public JsonResult UpdateTableDescription([FromBody] Ajax.UpdateTableDescription model)
+        {
+            SqlInfo info = new SqlInfo();
+            model.Server = HttpContext.Session.GetString("ServerName");
+            model.User = HttpContext.Session.GetString("UserName");
+            model.Pwd = HttpContext.Session.GetString("Password");
+            model.Catalog = HttpContext.Session.GetString("Catalog");
+            service.UpdateTableDescription(model, info);
+            return Json(new { success = info.Success, message = info.Message });
+        }
+
+        [HttpPost]
+        public JsonResult GetColumnDescription([FromBody] Ajax.QueryColumnDescription model)
+        {
+            SqlInfo Info = new SqlInfo();
+            model.Server = HttpContext.Session.GetString("ServerName");
+            model.User = HttpContext.Session.GetString("UserName");
+            model.Pwd = HttpContext.Session.GetString("Password");
+            model.Catalog = HttpContext.Session.GetString("Catalog");
+            service.GetColumnDescription(model, Info);
+            return Json(new { success = Info.Success, data = Info.StringData, message = Info.Message });
+        }
+
+        [HttpPost]
+        public JsonResult UpdateColumnDescription([FromBody] Ajax.UpdateColumnDescription model)
+        {
+            SqlInfo info = new SqlInfo();
+            model.Server = HttpContext.Session.GetString("ServerName");
+            model.User = HttpContext.Session.GetString("UserName");
+            model.Pwd = HttpContext.Session.GetString("Password");
+            model.Catalog = HttpContext.Session.GetString("Catalog");
+            service.UpdateColumnDescription(model, info);
+            return Json(new { success = info.Success, message = info.Message });
         }
     }
 }

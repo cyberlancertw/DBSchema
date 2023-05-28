@@ -25,5 +25,50 @@
             public string QName { get; set; }
             public int TableID { get; set; }
         }
+
+        public class QueryTableDescription
+        {
+            public string Server { get; set; }
+            public string User { get; set; }
+            public string Pwd { get; set; }
+            public string Catalog { get; set; }
+            public string TableName { get; set; }
+            public int TableID { set; get; }
+        }
+
+        public class UpdateTableDescription
+        {
+            public string Server { get; set; }
+            public string User { get; set; }
+            public string Pwd { get; set; }
+            public string Catalog { get; set; }
+            public bool InsertNew { get; set; }
+            public string TableName { get; set; }
+            public string TableSchema { get; set; }
+            public string Description { get; set; }
+        }
+
+        public class QueryColumnDescription
+        {
+            public string Server { get; set; }
+            public string User { get; set; }
+            public string Pwd { get; set; }
+            public string Catalog { get; set; }
+            public int TableID { set; get; }
+            public int ColumnID { get; set; }
+        }
+
+        public class UpdateColumnDescription
+        {
+            public string Server { get; set; }
+            public string User { get; set; }
+            public string Pwd { get; set; }
+            public string Catalog { get; set; }
+            public bool InsertNew { get; set; }
+            public string TableName { get; set; }
+            public string TableSchema { get; set; }
+            public string Description { get; set; }
+            public string ColumnName { get; set; }
+        }
     }
 }

@@ -12,11 +12,14 @@
     <input type="hidden" name="databaseName" value="@TempData["Catalog"]" />
     <input type="hidden" id="tableID" value="@TempData["TableID"]" />
     <input type="hidden" id="tableName" value="@TempData["Table"]" />
+    <input type="hidden" id="tableSchema" value="@TempData["TableSchema"]" />
+    <input type="hidden" id="columnName" value="" />
+    <input type="hidden" id="columnID" value="" />
 </form>
 <div id="divTop">
     <div id="divCommand">
         <button class="cy-button btn-red" id="btnBack"><i data-size="1">undo</i>返回</button>
-        <button class="cy-button btn-yellow" id="btnModifiy" disabled><i data-size="1">pencil</i>修改</button>
+        <button class="cy-button btn-yellow" id="btnEdit" disabled><i data-size="1">pencil</i>修改</button>
     </div>
     <div id="divQuery">
         <input type="text" id="queryColumn" value="" placeholder="查詢欄位名稱" /><button class="cy-button btn-blue" id="btnQuery"><i data-size="1">zoom</i>查詢</button>

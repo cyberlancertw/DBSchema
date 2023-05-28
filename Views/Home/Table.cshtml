@@ -11,14 +11,15 @@
 <form method="post" action="~/Home/Column/" id="formTable">
     <input type="hidden" name="tableName" id="tableName" value="" />
     <input type="hidden" name="tableID" id="tableID" value="" />
+    <input type="hidden" name="tableSchema" id="tableSchema" value="" />
 </form>
 <form method="post" action="~/Home/Database/" id="formBack">
 </form>
 <div id="divTop">
     <div id="divCommand">
         <button class="cy-button btn-red" id="btnBack"><i data-size="1">undo</i>返回</button>
-        <button class="cy-button btn-purple" id="btnExport"><i data-size="1">file</i>匯出</button>
-        <button class="cy-button btn-yellow" id="btnModifiy" disabled><i data-size="1">pencil</i>修改</button>
+        <button class="cy-button btn-purple" id="btnExport"><i data-size="1">file-excel</i>匯出</button>
+        <button class="cy-button btn-yellow" id="btnEdit" disabled><i data-size="1">pencil</i>修改</button>
         <button class="cy-button btn-green" id="btnSelect" disabled><i data-size="1">check</i>選擇</button>
     </div>
     <div id="divQuery">
