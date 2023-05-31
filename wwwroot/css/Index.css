@@ -39,5 +39,7 @@ input:active{
     border-color: blue;
 }
 button{
+    display: flex;
+    justify-content: center;
     margin-top: 1rem;
 }

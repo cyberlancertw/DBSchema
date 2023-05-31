@@ -236,5 +236,30 @@ namespace DBSchema.Models
                 info.Message = e.Message;
             }
         }
+
+        public void ReadExportTable(string server, string user, string pwd, string catalog, SqlInfo info)
+        {
+            string sql = string.Empty;
+            List<TransferItem> result = null;
+            try
+            {
+                using(var conn = db.Connection(server, catalog, user, pwd))
+                {
+                    sql = "SELECT [name] AS [Text], [object_id] AS [Value] FROM sys.tables ORDER BY [name];";
+                    result = conn.Query<TransferItem>(sql).ToList();
+                    info.ObjectData = result;
+                    info.Success = true;
+                }
+            }
+            catch (Exception e)
+            {
+                info.Message = e.Message;
+            }
+        }
+
+        public void ExportFile(Ajax.ExportFile model, SqlInfo info)
+        {
+
+        }
     }
 }

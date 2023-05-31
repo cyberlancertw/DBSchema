@@ -163,5 +163,35 @@ namespace DBSchema.Controllers
             service.UpdateColumnDescription(model, info);
             return Json(new { success = info.Success, message = info.Message });
         }
+
+        [HttpPost]
+        public JsonResult ReadExportTable()
+        {
+            SqlInfo info = new SqlInfo();
+            service.ReadExportTable(
+                HttpContext.Session.GetString("ServerName"),
+                HttpContext.Session.GetString("UserName"),
+                HttpContext.Session.GetString("Password"),
+                HttpContext.Session.GetString("Catalog"), info);
+            return Json(new { success = info.Success, fromData = info.ObjectData, message = info.Message });
+        }
+        [HttpPost]
+        public JsonResult ExportFile(Ajax.ExportFile model)
+        {
+            model.Server = HttpContext.Session.GetString("ServerName");
+            model.User = HttpContext.Session.GetString("UserName");
+            model.Pwd = HttpContext.Session.GetString("Password");
+            model.Catalog = HttpContext.Session.GetString("Catalog");
+            SqlInfo info = new SqlInfo();
+            service.ExportFile(model, info);
+            return Json(new { success = info.Success, token = info.StringData, message = info.Message });
+        }
+
+        [HttpPost]
+        public FileResult GetFile(string token)
+        {
+            byte[] result = null;
+            return File(result, "excel", "abc.xlsx");
+        }
     }
 }

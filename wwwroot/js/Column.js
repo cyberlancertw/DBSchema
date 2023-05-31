@@ -1,4 +1,5 @@
 ﻿const columnSchema = {
+    GridID: 'gridColumn',
     PrimaryKey: 'columnID',
     ReadAfterRender: true,
     Column: [
@@ -10,11 +11,13 @@
         {
             ColumnName: '欄位名稱',
             DataName: 'columnName',
-            SortType: 'ColumnName'
+            SortType: 'ColumnName',
+            Span: 2
         },
         {
             ColumnName: '描述',
             DataName: 'description',
+            Span: 3
         },
         {
             ColumnName: '資料類型',
@@ -60,7 +63,8 @@
                     default: return item.dataLength;
                 }
                 return;
-            }
+            },
+            Span: 3
         },
         {
             ColumnName: '預設值',
@@ -84,7 +88,8 @@
             Width: 80,
             Getter: function (item) {
                 return item.indexName;
-            }
+            },
+            Span: 2
         },
         {
             ColumnName: '自動遞增',
@@ -112,10 +117,11 @@
             }
         }
     ],
+    Height: 600,
     Page: {
         Enable: true,
-        PageSize: 15,
-        PageSizeSelect: [5, 10, 15],
+        PageSize: 50,
+        PageSizeSelect: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100],
         PositionUp: true
     },
     Sort: {
@@ -270,7 +276,7 @@ function RenderEditModal() {
 }
 
 window.addEventListener('load', function () {
-    CyGrid.Render('gridColumn', columnSchema);
+    CyGrid.Render(columnSchema);
     document.getElementById('btnBack').addEventListener('click', function () {
         document.getElementById('formBack').submit();
     });

@@ -14,6 +14,9 @@
     border-bottom-color: #000000;
     border-bottom-style: solid;
     border-bottom-width: 1px;
+    display: table;
+    width: calc(100% - 1rem);
+    table-layout: fixed;
 }
 
 /* 表格標題列中的欄 */
@@ -34,11 +37,21 @@
     text-align: right;
 }
 
+/* 表格資料主體 */
+.grid-tbody{
+    display: block;
+    overflow-y: scroll;
+    overflow-x: auto;
+}
+
 /* 表格資料中的列 */
 .grid-tbody > tr {
     border-bottom-color: #dee2e6;
     border-bottom-style: solid;
     border-bottom-width: 1px;
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }
 
 /* 表格資料中的偶數列 */
@@ -403,6 +416,104 @@ i[data-size]{
     display:none;
 }
 
+/* 傳送清單最外層 */
+.cy-transfer-wrap{
+    display: flex;
+    justify-content: center;
+}
+
+/* 傳送清單標題 */
+.cy-transfer-label-from, .cy-transfer-label-to{
+    font-size: 1rem;
+    font-weight: 900;
+    height: 10%;
+    box-sizing: border-box;
+}
+
+/* 傳送清單的來源與目的區外層 */
+.cy-transfer-from-wrap, .cy-transfer-to-wrap{
+    width: 42%;
+    height: 100%;
+}
+
+/* 過濾的查詢輸入框 */
+.cy-transfer-filter-textbox{
+    line-height: 1.5;
+    padding: 0.3rem;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid gray;
+    border-radius: 0.2rem;
+}
+/* 傳送清單來源區 */
+.cy-transfer-from{
+    padding: 1rem;
+    border: 1px solid black;
+    overflow: auto;
+    height: 90%;
+    box-sizing: border-box;
+}
+
+/* 傳送清單按鈕區 */
+.cy-transfer-button{
+    width: 15%;
+    padding: 1rem;
+}
+
+/* 傳送清單目的區 */
+.cy-transfer-to{
+    padding: 1rem;
+    border: 1px solid black;
+    overflow: auto;
+    height:90%;
+    box-sizing: border-box;
+}
+
+/* 傳送清單項目 */
+.cy-transfer-item{
+    line-height: 1.5;
+    padding: 0.6rem;
+    cursor: pointer;
+}
+
+/* 傳送清單項目因過濾而隱藏 */
+.cy-transfer-item.hidden{
+    display:none;
+}
+
+/* 傳送清單中項目的分隔線 */
+.cy-transfer-from > div:not(:last-child), .cy-transfer-to > div:not(:last-child){
+    border-bottom: 1px solid #fedfe1;
+}
+
+/* 傳送清單中項目的分隔線 */
+.cy-transfer-from > div:not(:first-child), .cy-transfer-to > div:not(:first-child){
+    border-top: 1px solid #fedfe1;
+}
+
+/* 傳送清單項目懸停*/
+.cy-transfer-item:hover{
+    background-color: #bbf5ff;
+}
+
+/* 傳送清單項目選取 */
+.cy-transfer-item.selected{
+    background-color: #abe5ff;
+}
+
+/* 傳送清單項目選取又懸停 */
+.cy-transfer-item.selected:hover{
+    background-color: #9bd5ff;
+}
+
+/* 傳送清單按鈕區外層 */
+.cy-transfer-button-wrap{
+    height:100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
 /* 藍色按鈕*/
 .btn-blue {
     color: #000000;

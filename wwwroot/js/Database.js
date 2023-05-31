@@ -1,4 +1,5 @@
 ﻿const databaseSchema = {
+    GridID: 'gridDatabase',
     PrimaryKey: 'id',
     ReadAfterRender: true,
     Column: [
@@ -25,21 +26,15 @@
             DataName: 'createTime',
             SortType: 'CreateTime',
             Getter: function (item) {
-                let t = new Date(item.createTime);
-                let y = t.getFullYear();
-                let M = t.getMonth() > 8 ? (t.getMonth() + 1) : '0' + (t.getMonth() + 1);
-                let d = t.getDate() > 9 ? t.getDate() : '0' + t.getDate();
-                let h = t.getHours() > 9 ? t.getHours() : '0' + t.getHours();
-                let m = t.getMinutes() > 9 ? t.getMinutes() : '0' + t.getMinutes();
-                let s = t.getSeconds() > 9 ? t.getSeconds() : '0' + t.getSeconds();
-                return y + '-' + M + '-' + d + " " + h + ":" + m + ":" + s;
+                return CyTool.DateTimeString(item.createTime);
             }
         }
     ],
+    Height: 600,
     Page: {
         Enable: true,
-        PageSize: 15,
-        PageSizeSelect: [5, 10, 15],
+        PageSize: 50,
+        PageSizeSelect: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100],
         PositionUp: true
     },
     Sort: {
@@ -78,7 +73,7 @@ function GetQueryName() {
     };
 }
 window.addEventListener('load', function () {
-    CyGrid.Render('gridDatabase', databaseSchema);
+    CyGrid.Render(databaseSchema);
     document.getElementById('btnBack').addEventListener('click', function () {
         location.href = pathBase + '/Home/';
     });

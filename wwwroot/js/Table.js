@@ -1,4 +1,5 @@
 ﻿const tableSchema = {
+    GridID: 'gridTable',
     PrimaryKey: 'tableID',
     ReadAfterRender: true,
     Column: [
@@ -19,23 +20,14 @@
         {
             ColumnName: '欄位數量',
             DataName: 'columnCount',
-            SortType: 'ColumnCount',
-            Width: 100
+            SortType: 'ColumnCount'
         },
         {
             ColumnName: '建立時間',
             DataName: 'createTime',
             SortType: 'CreateTime',
-            Width: 150,
             Getter: function (item) {
-                let t = new Date(item.createTime);
-                let y = t.getFullYear();
-                let M = t.getMonth() > 8 ? (t.getMonth() + 1) : '0' + (t.getMonth() + 1);
-                let d = t.getDate() > 9 ? t.getDate() : '0' + t.getDate();
-                let h = t.getHours() > 9 ? t.getHours() : '0' + t.getHours();
-                let m = t.getMinutes() > 9 ? t.getMinutes() : '0' + t.getMinutes();
-                let s = t.getSeconds() > 9 ? t.getSeconds() : '0' + t.getSeconds();
-                return y + '-' + M + '-' + d + " " + h + ":" + m + ":" + s;
+                return CyTool.DateTimeString(item.createTime);
             }
         },
         {
@@ -44,10 +36,11 @@
             Hidden: true
         }
     ],
+    Height: 600,
     Page: {
         Enable: true,
-        PageSize: 15,
-        PageSizeSelect: [5, 10, 15],
+        PageSize: 50,
+        PageSizeSelect: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100],
         PositionUp: true
     },
     Sort: {
@@ -84,6 +77,15 @@
     MultiSelect: false
 }
 
+const transferTable = {
+    TransferID: 'listTable',
+    Height: 480,
+    Label: {
+        From: '可選取資料表',
+        To: '已選取資料夾'
+    },
+    Filter: true
+};
 function GetQueryName() {
     return {
         QName: document.getElementById('queryTable').value,
@@ -206,8 +208,49 @@ function RenderEditModal() {
     return docFrag;
 }
 
+
+function RenderExportModal() {
+    let docFrag = document.createDocumentFragment();
+    let wrap = document.createElement('div');
+    docFrag.appendChild(wrap);
+    let radio1= document.createElement('input');
+    wrap.appendChild(radio1);
+    radio1.setAttribute('type', 'radio');
+    radio1.setAttribute('name', 'exportType');
+    radio1.setAttribute('id', 'exportChoose');
+    radio1.setAttribute('style', 'width:1rem;height:1rem;');
+    radio1.setAttribute('checked', true);
+    radio1.addEventListener('change', function () {
+        console.log('1:' + document.getElementById('exportChoose').getAttribute('checked'));
+    });
+    let label1 = document.createElement('label');
+    wrap.appendChild(label1);
+    label1.setAttribute('for', 'exportChoose');
+    label1.appendChild(document.createTextNode('選擇要匯出資料表'));
+    wrap.appendChild(document.createElement('br'))
+    let radio2 = document.createElement('input');
+    wrap.appendChild(radio2);
+    radio2.setAttribute('type', 'radio');
+    radio2.setAttribute('name', 'exportType');
+    radio2.setAttribute('id', 'exportAll');
+    radio2.setAttribute('style', 'width:1rem;height:1rem;');
+    radio2.setAttribute('checked', false);
+    radio2.addEventListener('change', function () {
+        console.log('2:' + document.getElementById('exportAll').getAttribute('checked'));
+    });
+    let label2 = document.createElement('label');
+    wrap.appendChild(label2);
+    label2.setAttribute('for', 'exportAll');
+    label2.appendChild(document.createTextNode('匯出全部資料表'));
+
+    let divTransfer = document.createElement('div');
+    docFrag.appendChild(divTransfer);
+    divTransfer.setAttribute('id', 'listTable');
+    return docFrag;
+}
+
 window.addEventListener('load', function () {
-    CyGrid.Render('gridTable', tableSchema);
+    CyGrid.Render(tableSchema);
     document.getElementById('btnBack').addEventListener('click', function () {
         document.getElementById('formBack').submit();
     });
@@ -223,6 +266,26 @@ window.addEventListener('load', function () {
             document.getElementById('btnQuery').click();
     });
     document.getElementById('btnEdit').addEventListener('click', btnEditClick);
+    document.getElementById('btnExport').addEventListener('click', function () {
+        document.getElementById('exportAll').checked = true;
+        fetch(pathBase + '/Home/ReadExportTable', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+        }).then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    console.log(res);
+                    CyTransfer.Fill('listTable', res.fromData);
+                    CyModal.Open('exportModal');
+                }
+                else {
+                    CyModal.Alert('讀取資料表發生異常：' + res.message );
+                }
+        }).catch(err => CyModal.Alert('讀取資料發生異常：' + err));
+    });
     CyModal.Render('editModal', RenderEditModal(), '500*350', '修改資料表描述');
+    CyModal.Render('exportModal', RenderExportModal(), '700*650', '匯出報表檔');
+    CyTransfer.Render(transferTable);
     document.getElementById('queryTable').focus();
 });
