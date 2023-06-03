@@ -195,14 +195,13 @@ function CyTransferFill(TransferID, FromData, ToData) {
     docFrag = document.createDocumentFragment();
     for (let i = 0, n = ToData.length; i < n; i++) {
         let item = ToData[i];
-        if (!item.Uid) item.Uid = CyTool.UUID();
         let divItem = document.createElement('div');
         docFrag.appendChild(divItem);
-        divItem.setAttribute('data-text', item.Text);
-        divItem.setAttribute('data-value', item.Value);
-        divItem.setAttribute('data-uid', item.Uid);
+        divItem.setAttribute('data-text', item.text);
+        divItem.setAttribute('data-value', item.value);
+        divItem.setAttribute('data-uid', CyTool.UUID());
         divItem.className = 'cy-transfer-item';
-        divItem.appendChild(document.createTextNode(item.Text));
+        divItem.appendChild(document.createTextNode(item.text));
         divItem.addEventListener('click', function () {
             if (divItem.classList.contains('selected')) {
                 divItem.classList.remove('selected');
@@ -241,6 +240,9 @@ function CyTransferCreateButton(TransferID, d, IsGo, IsAll) {
 }
 
 function CyTransferButtonGo(TransferID, IsAll) {
+    let schema = CySchema[TransferID];
+    // 有傳送前的事件則先執行
+    if (schema.Event && schema.Event.BeforeGo && typeof schema.Event.BeforeGo == 'function') schema.Event.BeforeGo();
     let divFrom = document.getElementById(TransferID).querySelector('.cy-transfer-from');
     let divTo = document.getElementById(TransferID).querySelector('.cy-transfer-to');
     let selector = IsAll ? '.cy-transfer-item' : '.cy-transfer-item.selected:not(.hidden)';
@@ -254,10 +256,14 @@ function CyTransferButtonGo(TransferID, IsAll) {
         document.getElementById(TransferID + '-filter-from').value = '';
         document.getElementById(TransferID + '-filter-to').value = '';
     }
-
+    // 有傳送後的事件則執行
+    if (schema.Event && schema.Event.AfterGo && typeof schema.Event.AfterGo == 'function') schema.Event.AfterGo();
 }
 
 function CyTransferButtonBack(TransferID, IsAll) {
+    let schema = CySchema[TransferID];
+    // 有返回前的事件則先執行
+    if (schema.Event && schema.Event.BeforeBack && typeof schema.Event.BeforeBack == 'function') schema.Event.BeforeBack();
     let divFrom = document.getElementById(TransferID).querySelector('.cy-transfer-from');
     let divTo = document.getElementById(TransferID).querySelector('.cy-transfer-to');
     let selector = IsAll ? '.cy-transfer-item' : '.cy-transfer-item.selected:not(.hidden)';
@@ -271,9 +277,15 @@ function CyTransferButtonBack(TransferID, IsAll) {
         document.getElementById(TransferID + '-filter-from').value = '';
         document.getElementById(TransferID + '-filter-to').value = '';
     }
+    // 有返回後的事件則執行
+    if (schema.Event && schema.Event.AfterBack && typeof schema.Event.AfterBack == 'function') schema.Event.AfterBack();
 }
 
 function CyTransferGetAllData(TransferID, RegionType, DataType) {
+    if (!TransferID) {
+        console.error('缺少 TransferID');
+        return;
+    }
     let items = document.getElementById(TransferID).querySelector('.cy-transfer-' + RegionType).querySelectorAll('.cy-transfer-item');
     let result = [];
     for (let i = 0, n = items.length; i < n; i++) {
@@ -1477,43 +1489,57 @@ const CyTransfer = {
         CyTransferFill(TransferID, FromData, ToData);
     },
     /**
+     * 清除所有項目
+     * @param {string} TransferID
+     */
+    Clear: function (TransferID) {
+        if (!TransferID) {
+            console.error('缺少 TransferID');
+            return;
+        }
+        let from = document.getElementById(TransferID).querySelector('.cy-transfer-from');
+        while (from.firstChild) from.removeChild(from.firstChild);
+        let to = document.getElementById(TransferID).querySelector('.cy-transfer-to');
+        while (to.firstChild) to.removeChild(to.firstChild);
+    },
+    /**
      * 取得 From 的所有項目的顯示文字 Text
-     * @param {any} TransferID
+     * @param {string} TransferID
      */
     GetFromText: function (TransferID) {
         return CyTransferGetAllData(TransferID, 'from', 'text');
     },
     /**
      * 取得 From 的所有項目的實際值 Value
-     * @param {any} TransferID
+     * @param {string} TransferID
      */
     GetFromValue: function (TransferID) {
         return CyTransferGetAllData(TransferID, 'from', 'value');
     },
     /**
      * 取得 From 的所有項目的編號 Uid
-     * @param {any} TransferID
+     * @param {string} TransferID
      */
     GetFromUid: function (TransferID) {
         return CyTransferGetAllData(TransferID, 'from', 'uid');
     },
     /**
      * 取得 To 的所有項目的顯示文字 Text
-     * @param {any} TransferID
+     * @param {string} TransferID
      */
     GetToText: function (TransferID) {
         return CyTransferGetAllData(TransferID, 'to', 'text');
     },
     /**
      * 取得 To 的所有項目的實際值 Value
-     * @param {any} TransferID
+     * @param {string} TransferID
      */
     GetToValue: function (TransferID) {
         return CyTransferGetAllData(TransferID, 'to', 'value');
     },
     /**
      * 取得 To 的所有項目的編號 Uid
-     * @param {any} TransferID
+     * @param {string} TransferID
      */
     GetToUid: function (TransferID) {
         return CyTransferGetAllData(TransferID, 'to', 'uid');

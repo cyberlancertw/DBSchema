@@ -213,40 +213,147 @@ function RenderExportModal() {
     let docFrag = document.createDocumentFragment();
     let wrap = document.createElement('div');
     docFrag.appendChild(wrap);
-    let radio1= document.createElement('input');
-    wrap.appendChild(radio1);
-    radio1.setAttribute('type', 'radio');
-    radio1.setAttribute('name', 'exportType');
-    radio1.setAttribute('id', 'exportChoose');
-    radio1.setAttribute('style', 'width:1rem;height:1rem;');
-    radio1.setAttribute('checked', true);
-    radio1.addEventListener('change', function () {
-        console.log('1:' + document.getElementById('exportChoose').getAttribute('checked'));
-    });
-    let label1 = document.createElement('label');
-    wrap.appendChild(label1);
-    label1.setAttribute('for', 'exportChoose');
-    label1.appendChild(document.createTextNode('選擇要匯出資料表'));
-    wrap.appendChild(document.createElement('br'))
-    let radio2 = document.createElement('input');
-    wrap.appendChild(radio2);
-    radio2.setAttribute('type', 'radio');
-    radio2.setAttribute('name', 'exportType');
-    radio2.setAttribute('id', 'exportAll');
-    radio2.setAttribute('style', 'width:1rem;height:1rem;');
-    radio2.setAttribute('checked', false);
-    radio2.addEventListener('change', function () {
-        console.log('2:' + document.getElementById('exportAll').getAttribute('checked'));
-    });
-    let label2 = document.createElement('label');
-    wrap.appendChild(label2);
-    label2.setAttribute('for', 'exportAll');
-    label2.appendChild(document.createTextNode('匯出全部資料表'));
+    let field = document.createElement('fieldset');
+    wrap.appendChild(field);
+    let legend = document.createElement('legend');
+    field.appendChild(legend);
+    legend.appendChild(document.createTextNode('資料表'));
+    field.appendChild(GetRadioLabel('exportChoose', 'exportType', '選擇要匯出的資料表'));
+    field.appendChild(GetRadioLabel('exportAll', 'exportType', '匯出所有資料表'));
+
+    field = document.createElement('fieldset');
+    wrap.appendChild(field);
+    legend = document.createElement('legend');
+    field.appendChild(legend);
+    legend.appendChild(document.createTextNode('匯出檔案類型'));
+    field.appendChild(GetRadioLabel('exportXlsx', 'fileType', '.xlsx'));
+    field.appendChild(GetRadioLabel('exportPdf', 'fileType', '.pdf'));
+    field.appendChild(GetRadioLabel('exportCsv', 'fileType', '.csv'));
+    field.appendChild(GetRadioLabel('exportDocx', 'fileType', '.docx'));
+
+    field = document.createElement('fieldset');
+    wrap.appendChild(field);
+    legend = document.createElement('legend');
+    field.appendChild(legend);
+    legend.appendChild(document.createTextNode('顏色格式'));
+    let divTitle = document.createElement('div');
+    field.appendChild(divTitle);
+    divTitle.appendChild(GetCheckLabel('checkTitle', 'exportConfig', '標題'));
+    divTitle.appendChild(GetColorPicker('titleFg', '#000000'));
+    divTitle.appendChild(GetColorPicker('titleBg', '#a6e186'));
+    let divSpecial = document.createElement('div');
+    field.appendChild(divSpecial);
+    divSpecial.appendChild(GetCheckLabel('checkSpecial', 'exportConfig', '特殊'));
+    divSpecial.appendChild(GetColorPicker('specialFg', '#f88aa0'));
+    divSpecial.appendChild(GetColorPicker('specialBg', '#ffffff'));
+
+    let exportBtn = document.createElement('button');
+    wrap.appendChild(exportBtn);
+    exportBtn.className = 'cy-button btn-blue';
+    let icon = document.createElement('i');
+    icon.setAttribute('data-size', '1');
+    icon.appendChild(document.createTextNode('file'));
+    exportBtn.appendChild(icon);
+    exportBtn.appendChild(document.createTextNode('匯出'));
+    exportBtn.addEventListener('click', ExportBtnClick);
 
     let divTransfer = document.createElement('div');
     docFrag.appendChild(divTransfer);
     divTransfer.setAttribute('id', 'listTable');
     return docFrag;
+}
+
+function GetRadioLabel(id, name, text) {
+    let div = document.createElement('div');
+    let radio = document.createElement('input');
+    div.appendChild(radio);
+    radio.setAttribute('type', 'radio');
+    radio.setAttribute('id', id);
+    radio.setAttribute('name', name);
+    let label = document.createElement('label');
+    div.appendChild(label);
+    label.setAttribute('for', id);
+    label.appendChild(document.createTextNode(text));
+    return div;
+}
+
+function GetCheckLabel(id, name, text) {
+    let div = document.createElement('div');
+    let check = document.createElement('input');
+    div.appendChild(check);
+    check.setAttribute('type', 'checkbox');
+    check.setAttribute('id', id);
+    check.setAttribute('name', name);
+    let label = document.createElement('label');
+    div.appendChild(label);
+    label.setAttribute('for', id);
+    label.appendChild(document.createTextNode(text));
+    return div;
+}
+
+function GetColorPicker(id, color) {
+    let picker = document.createElement('input');
+    picker.setAttribute('id', id);
+    picker.setAttribute('type', 'color');
+    picker.setAttribute('value', color);
+    picker.addEventListener('change', function () {
+        let parent = document.getElementById(id).parentNode;
+        let target = parent.querySelector('label');
+        let fg = parent.querySelectorAll('input[type="color"]')[0].value;
+        let bg = parent.querySelectorAll('input[type="color"]')[1].value;
+        target.setAttribute('style', 'color:' + fg + ';background-color:' + bg + ';');
+    });
+    return picker;
+}
+
+function BeforeOpenExportModal() {
+    document.getElementById('exportModal').querySelector('.cy-modal-main').querySelector('button').setAttribute('disabled', true);
+    document.getElementById('exportAll').checked = true;
+    document.getElementById('exportXlsx').checked = true;
+    let field3 = document.getElementById('exportModal').querySelector('fieldset:nth-child(3)');
+    field3.querySelectorAll('label')[0].setAttribute('style', 'color:#000000;background-color:#a6e186;');
+    field3.querySelectorAll('label')[1].setAttribute('style', 'color:#ff0000;background-color:#ffffff;');
+    document.getElementById('titleFg').value = '#000000';
+    document.getElementById('titleBg').value = '#a6e186';
+    document.getElementById('specialFg').value = '#ff0000';
+    document.getElementById('specialBg').value = '#ffffff';
+}
+function ExportBtnClick() {
+    let fields = document.getElementById('exportModal').querySelectorAll('fieldset');
+    let exportType = '';
+    let radios = fields[0].querySelectorAll('input');
+    for (let i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+            exportType = radios[i].getAttribute('id');
+        }
+    }
+    let fileType = '';
+    radios = fields[1].querySelectorAll('input');
+    for (let i = 0; i < radios.length; i++) {
+        if (radios[i].checked) {
+            fileType = radios[i].getAttribute('id');
+        }
+    }
+    let tableid;
+    if (exportType == 'exportChoose') {
+        tableid = CyTransfer.GetToValue('listTable');
+    }
+    fetch(pathBase + '/Home/ExportFile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            ExportType: exportType,
+            FileType: fileType,
+            TableID: tableid
+        })
+    }).then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                document.getElementById('formFile').querySelector('input').value = res.token;
+                document.getElementById('formFile').submit();
+            }
+            else CyModal.Alert(res.message, 'L');
+        }).catch(err => CyModal.Alert('匯出發生異常'));
 }
 
 window.addEventListener('load', function () {
@@ -267,7 +374,7 @@ window.addEventListener('load', function () {
     });
     document.getElementById('btnEdit').addEventListener('click', btnEditClick);
     document.getElementById('btnExport').addEventListener('click', function () {
-        document.getElementById('exportAll').checked = true;
+
         fetch(pathBase + '/Home/ReadExportTable', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -275,7 +382,7 @@ window.addEventListener('load', function () {
         }).then(res => res.json())
             .then(res => {
                 if (res.success) {
-                    console.log(res);
+                    BeforeOpenExportModal();
                     CyTransfer.Fill('listTable', res.fromData);
                     CyModal.Open('exportModal');
                 }
@@ -285,7 +392,7 @@ window.addEventListener('load', function () {
         }).catch(err => CyModal.Alert('讀取資料發生異常：' + err));
     });
     CyModal.Render('editModal', RenderEditModal(), '500*350', '修改資料表描述');
-    CyModal.Render('exportModal', RenderExportModal(), '700*650', '匯出報表檔');
+    CyModal.Render('exportModal', RenderExportModal(), '1000*730', '匯出報表檔');
     CyTransfer.Render(transferTable);
     document.getElementById('queryTable').focus();
 });

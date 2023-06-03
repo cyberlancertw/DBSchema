@@ -1,5 +1,10 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Hosting.Server;
+using NPOI.SS.Formula.Functions;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
+using NPOI.XSSF.UserModel;
+using System.Text;
 
 namespace DBSchema.Models
 {
@@ -257,9 +262,264 @@ namespace DBSchema.Models
             }
         }
 
-        public void ExportFile(Ajax.ExportFile model, SqlInfo info)
+        public void ExportXLSX(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, SqlInfo info)
+        {
+            try
+            {
+                using(var fs = new FileStream(FileName, FileMode.Create, FileAccess.Write))
+                {
+                    IWorkbook wkBook = new XSSFWorkbook();
+                    ISheet sheet = wkBook.CreateSheet("資料表總覽");
+                    int rowIndex = 0;
+                    IRow row = sheet.CreateRow(rowIndex);
+                    for (int i = 0; i < 8; i++)
+                        sheet.AutoSizeColumn(i, false);
+                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 1));
+                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
+                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 6, 7));
+                    row.CreateCell(0).SetCellValue("資料庫名稱");
+                    row.CreateCell(2).SetCellValue(Catalog);
+                    row.CreateCell(5).SetCellValue("製表時間");
+                    row.CreateCell(6).SetCellValue(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                    rowIndex += 2;
+                    row = sheet.CreateRow(rowIndex);
+                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
+                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
+                    row.CreateCell(0).SetCellValue("序號");
+                    row.CreateCell(1).SetCellValue("資料表名稱");
+                    row.CreateCell(3).SetCellValue("資料表描述");
+                    row.CreateCell(7).SetCellValue("欄位數量");
+
+                    for (int i = 0, n = TableData.Count; i < n; i++)
+                    {
+                        Table table = TableData[i];
+                        rowIndex++;
+                        row = sheet.CreateRow(rowIndex);
+                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
+                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
+                        row.CreateCell(0).SetCellValue((i + 1).ToString());
+                        row.CreateCell(1).SetCellValue(table.TableName);
+                        row.CreateCell(3).SetCellValue(table.Description);
+                        row.CreateCell(7).SetCellValue(table.ColumnCount);
+                    }
+
+                    for (int i = 0, n = TableData.Count; i < n; i++)
+                    {
+                        if (TableData[i].TableName.Length > 31) TableData[i].TableName = TableData[i].TableName.Substring(0, 31); // sheet 長度有限制
+                        sheet = wkBook.CreateSheet(TableData[i].TableName);
+                        rowIndex = 0;
+                        row = sheet.CreateRow(rowIndex);
+                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 1));
+                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
+                        row.CreateCell(0).SetCellValue("資料表名稱");
+                        row.CreateCell(2).SetCellValue(TableData[i].TableName);
+                        rowIndex += 2;
+                        row = sheet.CreateRow(rowIndex);
+                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
+                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 5));
+                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 7, 8));
+                        row.CreateCell(0).SetCellValue("序號");
+                        row.CreateCell(1).SetCellValue("欄位名稱");
+                        row.CreateCell(3).SetCellValue("欄位描述");
+                        row.CreateCell(6).SetCellValue("資料類型");
+                        row.CreateCell(7).SetCellValue("範圍");
+                        row.CreateCell(9).SetCellValue("預設值");
+                        row.CreateCell(10).SetCellValue("空值");
+                        row.CreateCell(11).SetCellValue("索引");
+                        row.CreateCell(12).SetCellValue("自動遞增");
+                        row.CreateCell(13).SetCellValue("主鍵");
+                        for (int s = 0, t = ColumnData[i].Count; s < t; s++)
+                        {
+                            rowIndex++;
+                            Column column = ColumnData[i][s];
+                            row = sheet.CreateRow(rowIndex);
+                            sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
+                            sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 5));
+                            sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 7, 8));
+                            row.CreateCell(0).SetCellValue((s + 1).ToString());
+                            row.CreateCell(1).SetCellValue(column.ColumnName);
+                            row.CreateCell(3).SetCellValue(column.Description);
+                            row.CreateCell(6).SetCellValue(GetDataType(column));
+                            row.CreateCell(7).SetCellValue(GetDataLength(column));
+                            row.CreateCell(9).SetCellValue(GetDefaultValue(column));
+                            row.CreateCell(10).SetCellValue(GetIsNull(column));
+                            row.CreateCell(11).SetCellValue(GetIndex(column));
+                            row.CreateCell(12).SetCellValue(GetIdentity(column));
+                            row.CreateCell(13).SetCellValue(GetPrimaryKey(column));
+                        }
+
+                    }
+                    wkBook.Write(fs, false);
+                }
+                info.StringData = FileName;
+                info.Success = true;
+            }
+            catch (Exception e)
+            {
+                info.Message = e.Message;
+            }
+        }
+
+        public void ExportPDF(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, SqlInfo info)
         {
 
+        }
+
+        public void ExportDOCX(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, SqlInfo info)
+        {
+
+        }
+
+        public void ExportCSV(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, SqlInfo info)
+        {
+            try
+            {
+                using (var fs = new FileStream(FileName, FileMode.Create, FileAccess.Write))
+                {
+                    StringBuilder builder = new StringBuilder();
+                    builder.Append("資料庫名稱,").Append(Catalog).Append(",製表時間,").Append(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")).AppendLine().AppendLine();
+                    builder.Append("序號,資料表名稱,資料表描述,欄位數量").AppendLine();
+                    for(int i = 0, n = TableData.Count; i < n; i++)
+                    {
+                        Table table = TableData[i];
+                        builder.Append((i + 1).ToString()).Append(",").Append(table.TableName).Append(",").Append(table.Description == null ? "" : table.Description.Replace("\n", "，").Replace('\r', ' ').Replace(",", "，")).Append(",").Append(table.ColumnCount.ToString()).AppendLine();
+                    }
+                    fs.Write(Encoding.UTF8.GetBytes(builder.ToString()));
+                }
+                info.Success = true;
+            }
+            catch (Exception e)
+            {
+                info.Message = e.Message;
+            }
+
+        }
+        public void ExportFile(Ajax.ExportFile model, SqlInfo info)
+        {
+            string sqlTable = string.Empty, sqlColumn = String.Empty;
+            List<Table> tableData = new List<Table>();
+            List<List<Column>> columnData = new List<List<Column>>();
+            try
+            {
+                using(var conn = db.Connection(model.Server, model.Catalog, model.User, model.Pwd))
+                {
+                    if (model.ExportType.Equals("exportAll"))
+                    {
+                        sqlTable = "SELECT [object_id] AS [TableID] FROM sys.tables ORDER BY [name];";
+                        model.TableID = conn.Query<string>(sqlTable).ToArray();
+                    }
+                    if (model.TableID.Length == 0) throw new Exception("無選擇資料表，故無檔案匯出");
+
+                    sqlTable = "SELECT T.[name] AS [TableName], P.[value] AS [Description], T.[max_column_id_used] AS [ColumnCount] FROM sys.tables AS T "
+                        + "LEFT JOIN sys.extended_properties AS P ON T.[object_id] = P.[major_id] AND P.[minor_id] = 0 AND P.[name] = 'MS_Description' WHERE T.[object_id] = @tableid";
+
+
+                    sqlColumn = "SELECT DISTINCT C.[name] AS [ColumnName], C.[column_id] as [ColumnID], P.[value] AS[Description], C.[system_type_id] AS[DataType], C.[max_length] AS[DataLength], C.[is_nullable] AS[IsNull], "
+                        + "C.[is_identity] AS[IsIdentity], D.[definition] AS[DefaultValue], CASE MAX(CAST(X.[is_primary_key] AS INT)) WHEN 1 THEN 1 ELSE NULL END AS[IsPrimaryKey], "
+                        + "STUFF((SELECT distinct ',' + ID.[name] FROM sys.index_columns AS IC LEFT JOIN sys.indexes AS ID ON IC.[index_id] = ID.[index_id] AND IC.[object_id] = ID.[object_id] "
+                        + "WHERE IC.[object_id] = I.[object_id] and IC.[column_id] = C.[column_id] FOR XML PATH('')), 1, 1, '') AS[IndexName] FROM sys.columns AS C "
+                        + "LEFT JOIN sys.extended_properties AS P ON C.[column_id] = P.[minor_id] AND C.[object_id] = P.[major_id] AND P.[class] = 1 "
+                        + "LEFT JOIN sys.default_constraints AS D ON C.[default_object_id] = D.[object_id] "
+                        + "LEFT JOIN sys.index_columns AS I ON C.[object_id] = I.[object_id] AND C.[column_id] = I.[column_id] "
+                        + "LEFT JOIN sys.indexes AS X ON I.[object_id] = X.[object_id] AND I.[index_id] = X.[index_id] "
+                        + "WHERE C.[object_id] = @tableid GROUP BY C.[name],C.[column_id],P.[value],C.[system_type_id],C.[max_length],C.[is_nullable],C.[is_identity],D.[definition],I.[object_id],I.[column_id]";
+                    for (int i = 0, n = model.TableID.Length; i < n; i++)
+                    {
+                        DynamicParameters para = new DynamicParameters();
+                        para.Add("tableid", model.TableID[i]);
+                        Table? table = conn.Query<Table>(sqlTable, para).FirstOrDefault();
+                        if (table == null) throw new Exception("匯出前查詢資料發生異常：" + model.TableID[i] + "資料表不存在");
+                        tableData.Add(table);
+                        List<Column> data = conn.Query<Column>(sqlColumn, para).ToList();
+                        columnData.Add(data);
+                    }
+                }
+                string filename ="wwwroot/temp/" + model.Catalog + "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                switch (model.FileType)
+                {
+                    case "exportXlsx":
+                        ExportXLSX(filename + ".xlsx", model.Catalog, tableData, columnData, info); break;
+                    case "exportPdf":
+                        ExportPDF(filename + ".pdf", model.Catalog, tableData, columnData, info); break;
+                    case "exportDocx":
+                        ExportDOCX(filename + ".docx", model.Catalog, tableData, columnData, info); break;
+                    case "exportCsv":
+                        ExportCSV(filename + ".csv", model.Catalog, tableData, columnData, info); break;
+                    default: break;
+                }
+            }
+            catch (Exception e)
+            {
+                info.Message = e.Message;
+            }
+        }
+
+        private string GetDataType(Column item)
+        {
+            switch (item.DataType)
+            {
+                case 56: return "INT";
+                case 167: return "VARCHAR";
+                case 231: return "NVARCHAR";
+                case 61: return "DATETIME";
+                case 104: return "BIT";
+                case 99: return "NTEXT";
+                case 106: return "DECIMAL";
+                case 62: return "FLOAT";
+                case 52: return "SMALLINT";
+                case 48: return "TINYINT";
+                case 40: return "DATE";
+                case 35: return "TEXT";
+                case 41: return "TIME";
+                case 239: return "NCHAR";
+                case 34: return "IMAGE";
+                case 241: return "XML";
+                default: return item.DataType.ToString();
+            }
+        }
+
+        private string GetDataLength(Column item)
+        {
+            switch (item.DataType)
+            {
+                case 48: return "0 至 255";
+                case 56: return "-2,147,483,648 至 2,147,483,647";
+                case 104: return "0 至 1";
+                case 167:
+                    if (item.DataLength < 0) return "0 至 MAX";
+                    else return "0 至 " + item.DataLength;
+                case 231:
+                    if (item.DataLength < 0) return "0 至 MAX";
+                    else return "0 至 " + item.DataLength / 2;
+                case 239: return (item.DataLength / 2).ToString();
+                default: return item.DataLength.ToString();
+            }
+        }
+
+        private string GetDefaultValue(Column item)
+        {
+            return item.DefaultValue == null ? "" : item.DefaultValue;
+        }
+
+        private string GetIsNull(Column item)
+        {
+            return item.IsNull ? "" : "不可";
+        }
+
+        private string GetIndex(Column item)
+        {
+            return string.IsNullOrEmpty(item.IndexName) ? "" : "有";
+        }
+
+        private string GetPrimaryKey(Column item)
+        {
+            return item.IsPrimaryKey ? "是" : "";
+        }
+
+        private string GetIdentity(Column item)
+        {
+            return item.IsIdentity ? "是" : "";
         }
     }
 }

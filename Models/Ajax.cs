@@ -78,9 +78,8 @@
             public string Pwd { get; set; }
             public string Catalog { get; set; }
             public string ExportType { get; set; }
-            public string[] TableName { get; set; }
-            public string[] TableID { get; set; }
             public string FileType { get; set; }
+            public string[] TableID { get; set; }
         }
     }
 }

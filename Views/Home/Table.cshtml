@@ -3,6 +3,7 @@
 }
 <link rel="stylesheet" href="~/css/CyTool.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Main.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Table.css" asp-append-version="true" />
 <script>
     var pathBase = '@(Context.Request.PathBase)';
 </script>
@@ -13,7 +14,10 @@
     <input type="hidden" name="tableID" id="tableID" value="" />
     <input type="hidden" name="tableSchema" id="tableSchema" value="" />
 </form>
-<form method="post" action="~/Home/Database/" id="formBack">
+<form method="post" action="~/Home/Database" id="formBack">
+</form>
+<form method="post" action="~/Home/GetFile" id="formFile">
+    <input type="hidden" name="token" value="" />
 </form>
 <div id="divTop">
     <div id="divCommand">

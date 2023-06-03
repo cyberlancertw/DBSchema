@@ -1,15 +1,37 @@
-﻿#divTop{
-    display:flex;
-    justify-content:space-between;
+﻿#exportModal input[type="radio"], #exportModal input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
 }
-#divTop > div > input{
-    line-height: 1.5;
-    height: 2rem;
-    border-radius: 0.3rem;
-    margin: 0.4rem;
-    padding: 0.3rem;
+
+#exportModal fieldset {
+    width: 250px;
+    height: 130px;
+    display: inline-block;
+    display: inline-flex;
+    flex-wrap: wrap;
+    border-radius: 0.4rem;
+    padding: 1rem;
+    box-sizing:border-box;
 }
-#spanServer{
-    font-size: 24px;
-    font-weight: 900;
+#exportModal div.cy-modal-main > div:first-child{
+    margin-bottom: 1rem;
 }
+#exportModal fieldset:first-child div{
+    width: 95%;
+}
+#exportModal fieldset:nth-child(2) div{
+    width: 40%;
+}
+#exportModal fieldset:not(:last-child){
+    margin-right: 1rem;
+}
+#exportModal fieldset > div{
+    padding: 0.2rem;
+}
+#exportModal fieldset:nth-child(3) > div{
+    display: flex;
+    justify-content: space-around;
+}
+#exportModal fieldset:nth-child(3) > div > input[type="color"]{
+    margin-left: 1rem;
+} 

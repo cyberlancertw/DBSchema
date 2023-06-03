@@ -176,7 +176,7 @@ namespace DBSchema.Controllers
             return Json(new { success = info.Success, fromData = info.ObjectData, message = info.Message });
         }
         [HttpPost]
-        public JsonResult ExportFile(Ajax.ExportFile model)
+        public JsonResult ExportFile([FromBody]Ajax.ExportFile model)
         {
             model.Server = HttpContext.Session.GetString("ServerName");
             model.User = HttpContext.Session.GetString("UserName");
@@ -184,14 +184,33 @@ namespace DBSchema.Controllers
             model.Catalog = HttpContext.Session.GetString("Catalog");
             SqlInfo info = new SqlInfo();
             service.ExportFile(model, info);
+            if(info.Success && info.StringData != null)
+            {
+                string uuid = Guid.NewGuid().ToString();
+                HttpContext.Session.SetString(uuid, info.StringData.Replace("wwwroot", ""));
+                info.StringData = uuid;
+            }
             return Json(new { success = info.Success, token = info.StringData, message = info.Message });
         }
 
         [HttpPost]
-        public FileResult GetFile(string token)
+        public IActionResult GetFile(string token)
         {
-            byte[] result = null;
-            return File(result, "excel", "abc.xlsx");
+            string? path = HttpContext.Session.GetString(token);
+            if (path == null) return new EmptyResult();
+            string contentType = string.Empty;
+            if(path.IndexOf(".xlsx") > -1)
+                contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            else if(path.IndexOf(".pdf") > -1)
+                contentType = "application/pdf";
+            else if(path.IndexOf(".docx") > -1)
+                contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            else if(path.IndexOf(".csv") > -1)
+                contentType = "text/csv";
+            else
+                contentType = "application/vnd.ms-excel";
+            string fileName = path.Substring(6);
+            return File(path, contentType, fileName);
         }
     }
 }
