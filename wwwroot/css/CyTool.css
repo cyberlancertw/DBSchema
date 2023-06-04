@@ -215,14 +215,13 @@
     box-shadow: 0 0 10px #404040 ;
     transform: translate(-50%,-50%);
     animation-name: modalPop;
-    animation-duration: 0.3s;
+    animation-duration: 0.5s;
 }
 
 /* 彈窗出現的動畫 */
 @keyframes modalPop {
     from {
-        width: 200px;
-        height: 200px;
+        opacity: 0%;
     }
     to {
     }

@@ -32,6 +32,9 @@
     display: flex;
     justify-content: space-around;
 }
+#exportModal fieldset:nth-child(3) > div label {
+    padding: 0px 6px;
+}
 #exportModal fieldset:nth-child(3) > div > input[type="color"]{
     margin-left: 1rem;
 } 

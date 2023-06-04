@@ -80,6 +80,10 @@
             public string ExportType { get; set; }
             public string FileType { get; set; }
             public string[] TableID { get; set; }
+            public string TitleFg { get; set; }
+            public string TitleBg { get; set; }
+            public string SpecialFg { get; set; }
+            public string SpecialBg { get; set; }
         }
     }
 }

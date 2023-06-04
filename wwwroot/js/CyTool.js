@@ -1524,6 +1524,17 @@ const CyTransfer = {
         return CyTransferGetAllData(TransferID, 'from', 'uid');
     },
     /**
+     * 取得 From 項目的個數
+     * @param {string} TransferID
+     */
+    GetFromCount: function (TransferID) {
+        if (!TransferID) {
+            console.error('缺少 TransferID');
+            return;
+        }
+        return document.getElementById(TransferID).querySelector('.cy-transfer-from').querySelectorAll('.cy-transfer-item').length;
+    },
+    /**
      * 取得 To 的所有項目的顯示文字 Text
      * @param {string} TransferID
      */
@@ -1544,6 +1555,17 @@ const CyTransfer = {
     GetToUid: function (TransferID) {
         return CyTransferGetAllData(TransferID, 'to', 'uid');
     },
+    /**
+     * 取得 To 項目的個數
+     * @param {string} TransferID
+     */
+    GetToCount: function (TransferID) {
+        if (!TransferID) {
+            console.error('缺少 TransferID');
+            return;
+        }
+        return document.getElementById(TransferID).querySelector('.cy-transfer-to').querySelectorAll('.cy-transfer-item').length;
+    }
 };
 
 window.addEventListener('load', CyLoadingInit);

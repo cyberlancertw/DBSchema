@@ -84,7 +84,11 @@ const transferTable = {
         From: '可選取資料表',
         To: '已選取資料夾'
     },
-    Filter: true
+    Filter: true,
+    Event: {
+        AfterGo: CheckBeforeExport,
+        AfterBack: CheckBeforeExport
+    }
 };
 function GetQueryName() {
     return {
@@ -270,6 +274,9 @@ function GetRadioLabel(id, name, text) {
     radio.setAttribute('type', 'radio');
     radio.setAttribute('id', id);
     radio.setAttribute('name', name);
+    if (id == 'exportChoose' || id == 'exportAll') {
+        radio.addEventListener('change', CheckBeforeExport);
+    }
     let label = document.createElement('label');
     div.appendChild(label);
     label.setAttribute('for', id);
@@ -338,13 +345,26 @@ function ExportBtnClick() {
     if (exportType == 'exportChoose') {
         tableid = CyTransfer.GetToValue('listTable');
     }
+    let titleFg = '', titleBg = '', specialFg = '', specialBg = '';
+    if (document.getElementById('checkTitle').checked) {
+        titleFg = document.getElementById('titleFg').value;
+        titleBg = document.getElementById('titleBg').value;
+    }
+    if (document.getElementById('checkSpecial').checked) {
+        specialFg = document.getElementById('specialFg').value;
+        specialBg = document.getElementById('specialBg').value;
+    }
     fetch(pathBase + '/Home/ExportFile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             ExportType: exportType,
             FileType: fileType,
-            TableID: tableid
+            TableID: tableid,
+            TitleFg: titleFg,
+            TitleBg: titleBg,
+            SpecialFg: specialFg,
+            SpecialBg: specialBg
         })
     }).then(res => res.json())
         .then(res => {
@@ -354,6 +374,13 @@ function ExportBtnClick() {
             }
             else CyModal.Alert(res.message, 'L');
         }).catch(err => CyModal.Alert('匯出發生異常'));
+}
+
+function CheckBeforeExport() {
+    let btn = document.getElementById('exportModal').querySelector('.cy-modal-main').querySelector('button');
+    if (document.getElementById('exportAll').checked) btn.removeAttribute('disabled');
+    else if (CyTransfer.GetToUid('listTable').length > 0) btn.removeAttribute('disabled');
+    else btn.setAttribute('disabled', true);
 }
 
 window.addEventListener('load', function () {

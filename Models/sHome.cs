@@ -1,9 +1,12 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Hosting.Server;
+using NPOI.HSSF.UserModel;
+using NPOI.HSSF.Util;
 using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
+using System.Drawing;
 using System.Text;
 
 namespace DBSchema.Models
@@ -262,7 +265,7 @@ namespace DBSchema.Models
             }
         }
 
-        public void ExportXLSX(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, SqlInfo info)
+        public void ExportXLSX(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, string titleFg, string titleBg, string specialFg, string specialBg, SqlInfo info)
         {
             try
             {
@@ -270,6 +273,18 @@ namespace DBSchema.Models
                 {
                     IWorkbook wkBook = new XSSFWorkbook();
                     ISheet sheet = wkBook.CreateSheet("資料表總覽");
+                    XSSFCellStyle styleTitle = (XSSFCellStyle)wkBook.CreateCellStyle();
+                    XSSFFont fontTitle = (XSSFFont)wkBook.CreateFont();
+                    styleTitle.FillPattern = FillPattern.SolidForeground;
+                    styleTitle.SetFont(fontTitle);
+                    if (!string.IsNullOrEmpty(titleFg))
+                    {
+                        fontTitle.SetColor(new XSSFColor(new byte[] { Convert.ToByte(titleFg.Substring(1, 2), 16), Convert.ToByte(titleFg.Substring(3, 2), 16), Convert.ToByte(titleFg.Substring(5, 2), 16) }));
+                        styleTitle.SetFillForegroundColor(new XSSFColor(new byte[] { Convert.ToByte(titleBg.Substring(1, 2), 16), Convert.ToByte(titleBg.Substring(3, 2), 16), Convert.ToByte(titleBg.Substring(5, 2), 16) }));
+                        //styleTitle.FillBackgroundXSSFColor = new XSSFColor(new byte[] { 0, 0, 255 });
+                        //styleTitle.SetFillBackgroundColor(new XSSFColor(new byte[] { 0, 0, 255 }));
+
+                    }
                     int rowIndex = 0;
                     IRow row = sheet.CreateRow(rowIndex);
                     for (int i = 0; i < 8; i++)
@@ -286,10 +301,29 @@ namespace DBSchema.Models
                     row = sheet.CreateRow(rowIndex);
                     sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
                     sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
-                    row.CreateCell(0).SetCellValue("序號");
-                    row.CreateCell(1).SetCellValue("資料表名稱");
-                    row.CreateCell(3).SetCellValue("資料表描述");
-                    row.CreateCell(7).SetCellValue("欄位數量");
+
+                    if (string.IsNullOrEmpty(titleFg))
+                    {
+                        row.CreateCell(0).SetCellValue("序號");
+                        row.CreateCell(1).SetCellValue("資料表名稱");
+                        row.CreateCell(3).SetCellValue("資料表描述");
+                        row.CreateCell(7).SetCellValue("欄位數量");
+                    }
+                    else
+                    {
+                        ICell cell = row.CreateCell(0);
+                        cell.CellStyle = styleTitle;
+                        cell.SetCellValue("序號");
+                        cell = row.CreateCell(1);
+                        cell.CellStyle = styleTitle;
+                        cell.SetCellValue("資料表名稱");
+                        cell = row.CreateCell(3);
+                        cell.CellStyle = styleTitle;
+                        cell.SetCellValue("資料表描述");
+                        cell = row.CreateCell(7);
+                        cell.CellStyle = styleTitle;
+                        cell.SetCellValue("欄位數量");
+                    }                    
 
                     for (int i = 0, n = TableData.Count; i < n; i++)
                     {
@@ -361,12 +395,12 @@ namespace DBSchema.Models
             }
         }
 
-        public void ExportPDF(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, SqlInfo info)
+        public void ExportPDF(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, string titleFg, string titleBg, string specialFg, string specialBg, SqlInfo info)
         {
 
         }
 
-        public void ExportDOCX(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, SqlInfo info)
+        public void ExportDOCX(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, string titleFg, string titleBg, string specialFg, string specialBg, SqlInfo info)
         {
 
         }
@@ -439,11 +473,11 @@ namespace DBSchema.Models
                 switch (model.FileType)
                 {
                     case "exportXlsx":
-                        ExportXLSX(filename + ".xlsx", model.Catalog, tableData, columnData, info); break;
+                        ExportXLSX(filename + ".xlsx", model.Catalog, tableData, columnData, model.TitleFg, model.TitleBg, model.SpecialFg, model.SpecialBg, info); break;
                     case "exportPdf":
-                        ExportPDF(filename + ".pdf", model.Catalog, tableData, columnData, info); break;
+                        ExportPDF(filename + ".pdf", model.Catalog, tableData, columnData, model.TitleFg, model.TitleBg, model.SpecialFg, model.SpecialBg, info); break;
                     case "exportDocx":
-                        ExportDOCX(filename + ".docx", model.Catalog, tableData, columnData, info); break;
+                        ExportDOCX(filename + ".docx", model.Catalog, tableData, columnData, model.TitleFg, model.TitleBg, model.SpecialFg, model.SpecialBg, info); break;
                     case "exportCsv":
                         ExportCSV(filename + ".csv", model.Catalog, tableData, columnData, info); break;
                     default: break;
