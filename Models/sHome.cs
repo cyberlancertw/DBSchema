@@ -15,11 +15,13 @@ namespace DBSchema.Models
     {
         private readonly DB db;
         private readonly IWebHostEnvironment env;
+        private readonly IHttpContextAccessor accessor;
 
-        public sHome(DB db, IWebHostEnvironment environment)
+        public sHome(DB db, IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor)
         {
             this.db = db;
             env = environment;
+            accessor = httpContextAccessor;
         }
 
         public void CheckValid(Ajax.CheckValid model, SqlInfo info)
@@ -265,53 +267,106 @@ namespace DBSchema.Models
             }
         }
 
-        public void ExportXLSX(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, string titleFg, string titleBg, string specialFg, string specialBg, SqlInfo info)
+        public void ExportXLSX(Ajax.ExportFile model, SqlInfo info)
         {
+            model.FileName += ".xlsx";
+            bool useTitleColor = !string.IsNullOrEmpty(model.TitleColor) && model.TitleColor.Length == 12;
+            bool useSpecialColor = !string.IsNullOrEmpty(model.SpecialColor) && model.SpecialColor.Length == 12;
             try
             {
-                using(var fs = new FileStream(FileName, FileMode.Create, FileAccess.Write))
+                AdjustTableName(model.TableData);
+                RenewProgress(++model.FinishCount, model.TaskCount, model.ProgressID);
+                using (var fs = new FileStream(model.FileName, FileMode.Create, FileAccess.Write))
                 {
                     IWorkbook wkBook = new XSSFWorkbook();
                     ISheet sheet = wkBook.CreateSheet("資料表總覽");
+                    int[] columnWidth = { 7, 11, 11, 15, 15, 15, 15, 10 };
+                    for (int i = 0; i < 8; i++)
+                    {
+                        sheet.SetColumnWidth(i, columnWidth[i] * 256);
+                    }
                     XSSFCellStyle styleTitle = (XSSFCellStyle)wkBook.CreateCellStyle();
                     XSSFFont fontTitle = (XSSFFont)wkBook.CreateFont();
-                    styleTitle.FillPattern = FillPattern.SolidForeground;
-                    styleTitle.SetFont(fontTitle);
-                    if (!string.IsNullOrEmpty(titleFg))
-                    {
-                        fontTitle.SetColor(new XSSFColor(new byte[] { Convert.ToByte(titleFg.Substring(1, 2), 16), Convert.ToByte(titleFg.Substring(3, 2), 16), Convert.ToByte(titleFg.Substring(5, 2), 16) }));
-                        styleTitle.SetFillForegroundColor(new XSSFColor(new byte[] { Convert.ToByte(titleBg.Substring(1, 2), 16), Convert.ToByte(titleBg.Substring(3, 2), 16), Convert.ToByte(titleBg.Substring(5, 2), 16) }));
-                        //styleTitle.FillBackgroundXSSFColor = new XSSFColor(new byte[] { 0, 0, 255 });
-                        //styleTitle.SetFillBackgroundColor(new XSSFColor(new byte[] { 0, 0, 255 }));
+                    XSSFCellStyle styleSpecial = (XSSFCellStyle)wkBook.CreateCellStyle();
+                    XSSFFont fontSpecial = (XSSFFont)wkBook.CreateFont();
 
+                    if (useTitleColor)
+                    {
+                        fontTitle.SetColor(new XSSFColor(new byte[] { Convert.ToByte(model.TitleColor.Substring(0, 2), 16), Convert.ToByte(model.TitleColor.Substring(2, 2), 16), Convert.ToByte(model.TitleColor.Substring(4, 2), 16) }));
+                        if (!model.TitleColor.Substring(6).ToLower().Equals("ffffff"))
+                        {
+                            styleTitle.FillPattern = FillPattern.SolidForeground;
+                            styleTitle.SetFillForegroundColor(new XSSFColor(new byte[] { Convert.ToByte(model.TitleColor.Substring(6, 2), 16), Convert.ToByte(model.TitleColor.Substring(8, 2), 16), Convert.ToByte(model.TitleColor.Substring(10, 2), 16) }));
+                        }
+                        fontTitle.FontName = "標楷體";
+                        fontTitle.FontHeightInPoints = 12;
+                        styleTitle.SetFont(fontTitle);
+                        styleTitle.BorderLeft = BorderStyle.Thin;
+                        styleTitle.BorderBottom = BorderStyle.Thin;
+                        styleTitle.BorderRight = BorderStyle.Thin;
+                        styleTitle.BorderTop = BorderStyle.Thin;
+                        styleTitle.VerticalAlignment = VerticalAlignment.Center;
                     }
+                    if (useSpecialColor)
+                    {
+                        fontSpecial.SetColor(new XSSFColor(new byte[] { Convert.ToByte(model.SpecialColor.Substring(0, 2), 16), Convert.ToByte(model.SpecialColor.Substring(2, 2), 16), Convert.ToByte(model.SpecialColor.Substring(4, 2), 16) }));
+                        if (!model.SpecialColor.Substring(6).ToLower().Equals("ffffff"))
+                        {
+                            styleSpecial.FillPattern = FillPattern.SolidForeground;
+                            styleSpecial.SetFillForegroundColor(new XSSFColor(new byte[] { Convert.ToByte(model.SpecialColor.Substring(6, 2), 16), Convert.ToByte(model.SpecialColor.Substring(8, 2), 16), Convert.ToByte(model.SpecialColor.Substring(10, 2), 16) }));
+                        }
+                        fontSpecial.FontName = "標楷體";
+                        fontSpecial.FontHeightInPoints = 12;
+                        styleSpecial.SetFont(fontSpecial);
+                        styleSpecial.BorderLeft = BorderStyle.Thin;
+                        styleSpecial.BorderBottom = BorderStyle.Thin;
+                        styleSpecial.BorderRight = BorderStyle.Thin;
+                        styleSpecial.BorderTop = BorderStyle.Thin;
+                        styleSpecial.VerticalAlignment = VerticalAlignment.Center;
+                    }
+                    ICellStyle styleNormal = wkBook.CreateCellStyle();
+                    IFont fontNormal = wkBook.CreateFont();
+                    fontNormal.FontName = "標楷體";
+                    fontNormal.FontHeightInPoints = 12;
+                    styleNormal.SetFont(fontNormal);
+                    styleNormal.BorderLeft = BorderStyle.Thin;
+                    styleNormal.BorderBottom = BorderStyle.Thin;
+                    styleNormal.BorderRight = BorderStyle.Thin;
+                    styleNormal.BorderTop = BorderStyle.Thin;
+                    styleNormal.VerticalAlignment = VerticalAlignment.Center;
+
                     int rowIndex = 0;
                     IRow row = sheet.CreateRow(rowIndex);
-                    for (int i = 0; i < 8; i++)
-                        sheet.AutoSizeColumn(i, false);
+                    row.Height = 2 * 256;
                     sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 1));
                     sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
                     sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 6, 7));
-                    row.CreateCell(0).SetCellValue("資料庫名稱");
-                    row.CreateCell(2).SetCellValue(Catalog);
-                    row.CreateCell(5).SetCellValue("製表時間");
-                    row.CreateCell(6).SetCellValue(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                    ICell cell = row.CreateCell(0);
+                    cell.CellStyle = styleNormal;
+                    cell.SetCellValue("資料庫名稱");
+
+                    cell = row.CreateCell(2);
+                    cell.CellStyle = styleNormal;
+                    cell.SetCellValue(model.Catalog);
+
+                    cell = row.CreateCell(5);
+                    cell.CellStyle = styleNormal;
+                    cell.SetCellValue("製表時間");
+
+                    cell = row.CreateCell(6);
+                    cell.CellStyle = styleNormal;
+                    cell.SetCellValue(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
                     rowIndex += 2;
                     row = sheet.CreateRow(rowIndex);
+                    row.Height = 2 * 256;
                     sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
                     sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
 
-                    if (string.IsNullOrEmpty(titleFg))
+                    if (useTitleColor)
                     {
-                        row.CreateCell(0).SetCellValue("序號");
-                        row.CreateCell(1).SetCellValue("資料表名稱");
-                        row.CreateCell(3).SetCellValue("資料表描述");
-                        row.CreateCell(7).SetCellValue("欄位數量");
-                    }
-                    else
-                    {
-                        ICell cell = row.CreateCell(0);
+                        cell = row.CreateCell(0);
                         cell.CellStyle = styleTitle;
                         cell.SetCellValue("序號");
                         cell = row.CreateCell(1);
@@ -323,70 +378,216 @@ namespace DBSchema.Models
                         cell = row.CreateCell(7);
                         cell.CellStyle = styleTitle;
                         cell.SetCellValue("欄位數量");
+                    }
+                    else
+                    {
+                        cell = row.CreateCell(0);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue("序號");
+                        cell = row.CreateCell(1);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue("資料表名稱");
+                        cell = row.CreateCell(3);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue("資料表描述");
+                        cell = row.CreateCell(7);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue("欄位數量");
                     }                    
 
-                    for (int i = 0, n = TableData.Count; i < n; i++)
+                    for (int i = 0, n = model.TableData.Count; i < n; i++)
                     {
-                        Table table = TableData[i];
+                        Table table = model.TableData[i];
                         rowIndex++;
                         row = sheet.CreateRow(rowIndex);
+                        row.Height = 2 * 256;
                         sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
                         sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
-                        row.CreateCell(0).SetCellValue((i + 1).ToString());
-                        row.CreateCell(1).SetCellValue(table.TableName);
-                        row.CreateCell(3).SetCellValue(table.Description);
-                        row.CreateCell(7).SetCellValue(table.ColumnCount);
+
+                        cell = row.CreateCell(0);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue(i + 1);
+
+                        cell = row.CreateCell(1);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue(table.TableName);
+
+                        cell = row.CreateCell(3);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue(table.Description);
+
+                        cell = row.CreateCell(7);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue(table.ColumnCount);
                     }
 
-                    for (int i = 0, n = TableData.Count; i < n; i++)
+
+                    RenewProgress(++model.FinishCount, model.TaskCount, model.ProgressID);
+                    for (int i = 0, n = model.TableData.Count; i < n; i++)
                     {
-                        if (TableData[i].TableName.Length > 31) TableData[i].TableName = TableData[i].TableName.Substring(0, 31); // sheet 長度有限制
-                        sheet = wkBook.CreateSheet(TableData[i].TableName);
+                        
+                        sheet = wkBook.CreateSheet(model.TableData[i].TableName);
                         rowIndex = 0;
                         row = sheet.CreateRow(rowIndex);
                         sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 1));
                         sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
-                        row.CreateCell(0).SetCellValue("資料表名稱");
-                        row.CreateCell(2).SetCellValue(TableData[i].TableName);
+                        cell = row.CreateCell(0);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue("資料表名稱");
+
+                        cell = row.CreateCell(2);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue(model.TableData[i].TableName);
+
                         rowIndex += 2;
                         row = sheet.CreateRow(rowIndex);
                         sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
                         sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 5));
                         sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 7, 8));
-                        row.CreateCell(0).SetCellValue("序號");
-                        row.CreateCell(1).SetCellValue("欄位名稱");
-                        row.CreateCell(3).SetCellValue("欄位描述");
-                        row.CreateCell(6).SetCellValue("資料類型");
-                        row.CreateCell(7).SetCellValue("範圍");
-                        row.CreateCell(9).SetCellValue("預設值");
-                        row.CreateCell(10).SetCellValue("空值");
-                        row.CreateCell(11).SetCellValue("索引");
-                        row.CreateCell(12).SetCellValue("自動遞增");
-                        row.CreateCell(13).SetCellValue("主鍵");
-                        for (int s = 0, t = ColumnData[i].Count; s < t; s++)
+                        if (useTitleColor)
+                        {
+                            cell = row.CreateCell(0);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("序號");
+                            cell = row.CreateCell(1);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("欄位名稱");
+                            cell = row.CreateCell(3);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("欄位描述");
+                            cell = row.CreateCell(6);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("欄位類型");
+                            cell = row.CreateCell(7);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("欄位範圍");
+                            cell = row.CreateCell(9);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("預設值");
+                            cell = row.CreateCell(10);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("空值");
+                            cell = row.CreateCell(11);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("索引");
+                            cell = row.CreateCell(12);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("自動遞增");
+                            cell = row.CreateCell(13);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("主鍵");
+                        }
+                        else
+                        {
+                            cell = row.CreateCell(0);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("序號");
+
+                            cell = row.CreateCell(1);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("欄位名稱");
+
+                            cell = row.CreateCell(3);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("欄位描述");
+
+                            cell = row.CreateCell(6);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("資料類型");
+
+                            cell = row.CreateCell(7);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("範圍");
+
+                            cell = row.CreateCell(9);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("預設值");
+
+                            cell = row.CreateCell(10);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("空值");
+
+                            cell = row.CreateCell(11);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("索引");
+
+                            cell = row.CreateCell(12);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("自動遞增");
+
+                            cell = row.CreateCell(13);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("主鍵");
+                        }
+                        for (int s = 0, t = model.ColumnData[i].Count; s < t; s++)
                         {
                             rowIndex++;
-                            Column column = ColumnData[i][s];
+                            Column column = model.ColumnData[i][s];
                             row = sheet.CreateRow(rowIndex);
                             sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
                             sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 5));
                             sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 7, 8));
-                            row.CreateCell(0).SetCellValue((s + 1).ToString());
-                            row.CreateCell(1).SetCellValue(column.ColumnName);
-                            row.CreateCell(3).SetCellValue(column.Description);
-                            row.CreateCell(6).SetCellValue(GetDataType(column));
-                            row.CreateCell(7).SetCellValue(GetDataLength(column));
-                            row.CreateCell(9).SetCellValue(GetDefaultValue(column));
-                            row.CreateCell(10).SetCellValue(GetIsNull(column));
-                            row.CreateCell(11).SetCellValue(GetIndex(column));
-                            row.CreateCell(12).SetCellValue(GetIdentity(column));
-                            row.CreateCell(13).SetCellValue(GetPrimaryKey(column));
-                        }
 
+                            cell = row.CreateCell(0);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue(s + 1);
+
+                            cell = row.CreateCell(1);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue(column.ColumnName);
+
+                            cell = row.CreateCell(3);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue(column.Description);
+
+                            cell = row.CreateCell(6);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue(GetDataType(column));
+
+                            cell = row.CreateCell(7);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue(GetDataLength(column));
+
+                            cell = row.CreateCell(9);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue(GetDefaultValue(column));
+
+                            cell = row.CreateCell(10);
+                            if(useSpecialColor && !column.IsNull)
+                            {
+                                cell.CellStyle = styleSpecial;
+                            }
+                            else
+                            {
+                                cell.CellStyle = styleNormal;
+                            }
+                            cell.SetCellValue(GetIsNull(column));
+
+                            cell = row.CreateCell(11);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue(GetIndex(column));
+
+                            cell = row.CreateCell(12);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue(GetIdentity(column));
+
+                            cell = row.CreateCell(13);
+                            if (useSpecialColor && column.IsPrimaryKey)
+                            {
+                                cell.CellStyle = styleSpecial;
+                            }
+                            else
+                            {
+                                cell.CellStyle = styleNormal;
+                            }
+                            cell.SetCellValue(GetPrimaryKey(column));                            
+                        }
                     }
+                    RenewProgress(++model.FinishCount, model.TaskCount, model.ProgressID);
                     wkBook.Write(fs, false);
+                    RenewProgress(++model.FinishCount, model.TaskCount, model.ProgressID);
                 }
-                info.StringData = FileName;
+                info.StringData = model.FileName;
                 info.Success = true;
             }
             catch (Exception e)
@@ -395,28 +596,29 @@ namespace DBSchema.Models
             }
         }
 
-        public void ExportPDF(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, string titleFg, string titleBg, string specialFg, string specialBg, SqlInfo info)
+        public void ExportPDF(Ajax.ExportFile model, SqlInfo info)
         {
-
+            model.FileName += ".pdf";
         }
 
-        public void ExportDOCX(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, string titleFg, string titleBg, string specialFg, string specialBg, SqlInfo info)
+        public void ExportDOCX(Ajax.ExportFile model, SqlInfo info)
         {
-
+            model.FileName += ".docx";
         }
 
-        public void ExportCSV(string FileName, string Catalog, List<Table> TableData, List<List<Column>> ColumnData, SqlInfo info)
+        public void ExportCSV(Ajax.ExportFile model, SqlInfo info)
         {
+            model.FileName += ".csv";
             try
             {
-                using (var fs = new FileStream(FileName, FileMode.Create, FileAccess.Write))
+                using (var fs = new FileStream(model.FileName, FileMode.Create, FileAccess.Write))
                 {
                     StringBuilder builder = new StringBuilder();
-                    builder.Append("資料庫名稱,").Append(Catalog).Append(",製表時間,").Append(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")).AppendLine().AppendLine();
+                    builder.Append("資料庫名稱,").Append(model.Catalog).Append(",製表時間,").Append(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")).AppendLine().AppendLine();
                     builder.Append("序號,資料表名稱,資料表描述,欄位數量").AppendLine();
-                    for(int i = 0, n = TableData.Count; i < n; i++)
+                    for(int i = 0, n = model.TableData.Count; i < n; i++)
                     {
-                        Table table = TableData[i];
+                        Table table = model.TableData[i];
                         builder.Append((i + 1).ToString()).Append(",").Append(table.TableName).Append(",").Append(table.Description == null ? "" : table.Description.Replace("\n", "，").Replace('\r', ' ').Replace(",", "，")).Append(",").Append(table.ColumnCount.ToString()).AppendLine();
                     }
                     fs.Write(Encoding.UTF8.GetBytes(builder.ToString()));
@@ -432,22 +634,23 @@ namespace DBSchema.Models
         public void ExportFile(Ajax.ExportFile model, SqlInfo info)
         {
             string sqlTable = string.Empty, sqlColumn = String.Empty;
-            List<Table> tableData = new List<Table>();
-            List<List<Column>> columnData = new List<List<Column>>();
+            model.FinishCount = 1;
+            model.TableData = new List<Table>();
+            model.ColumnData = new List<List<Column>>();
             try
             {
-                using(var conn = db.Connection(model.Server, model.Catalog, model.User, model.Pwd))
-                {
+                using (var conn = db.Connection(model.Server, model.Catalog, model.User, model.Pwd))
+                { 
                     if (model.ExportType.Equals("exportAll"))
                     {
                         sqlTable = "SELECT [object_id] AS [TableID] FROM sys.tables ORDER BY [name];";
                         model.TableID = conn.Query<string>(sqlTable).ToArray();
                     }
                     if (model.TableID.Length == 0) throw new Exception("無選擇資料表，故無檔案匯出");
-
+                    model.TaskCount = 5 + model.TableID.Length;
+                    RenewProgress(model.FinishCount, model.TaskCount, model.ProgressID);
                     sqlTable = "SELECT T.[name] AS [TableName], P.[value] AS [Description], T.[max_column_id_used] AS [ColumnCount] FROM sys.tables AS T "
                         + "LEFT JOIN sys.extended_properties AS P ON T.[object_id] = P.[major_id] AND P.[minor_id] = 0 AND P.[name] = 'MS_Description' WHERE T.[object_id] = @tableid";
-
 
                     sqlColumn = "SELECT DISTINCT C.[name] AS [ColumnName], C.[column_id] as [ColumnID], P.[value] AS[Description], C.[system_type_id] AS[DataType], C.[max_length] AS[DataLength], C.[is_nullable] AS[IsNull], "
                         + "C.[is_identity] AS[IsIdentity], D.[definition] AS[DefaultValue], CASE MAX(CAST(X.[is_primary_key] AS INT)) WHEN 1 THEN 1 ELSE NULL END AS[IsPrimaryKey], "
@@ -464,22 +667,24 @@ namespace DBSchema.Models
                         para.Add("tableid", model.TableID[i]);
                         Table? table = conn.Query<Table>(sqlTable, para).FirstOrDefault();
                         if (table == null) throw new Exception("匯出前查詢資料發生異常：" + model.TableID[i] + "資料表不存在");
-                        tableData.Add(table);
+                        model.TableData.Add(table);
                         List<Column> data = conn.Query<Column>(sqlColumn, para).ToList();
-                        columnData.Add(data);
+                        model.ColumnData.Add(data);
+                        RenewProgress(++model.FinishCount, model.TaskCount, model.ProgressID);
                     }
                 }
-                string filename ="wwwroot/temp/" + model.Catalog + "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                
+                model.FileName ="wwwroot/temp/" + model.Catalog + "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
                 switch (model.FileType)
                 {
                     case "exportXlsx":
-                        ExportXLSX(filename + ".xlsx", model.Catalog, tableData, columnData, model.TitleFg, model.TitleBg, model.SpecialFg, model.SpecialBg, info); break;
+                        ExportXLSX(model, info); break;
                     case "exportPdf":
-                        ExportPDF(filename + ".pdf", model.Catalog, tableData, columnData, model.TitleFg, model.TitleBg, model.SpecialFg, model.SpecialBg, info); break;
+                        ExportPDF(model, info); break;
                     case "exportDocx":
-                        ExportDOCX(filename + ".docx", model.Catalog, tableData, columnData, model.TitleFg, model.TitleBg, model.SpecialFg, model.SpecialBg, info); break;
+                        ExportDOCX(model, info); break;
                     case "exportCsv":
-                        ExportCSV(filename + ".csv", model.Catalog, tableData, columnData, info); break;
+                        ExportCSV(model, info); break;
                     default: break;
                 }
             }
@@ -554,6 +759,27 @@ namespace DBSchema.Models
         private string GetIdentity(Column item)
         {
             return item.IsIdentity ? "是" : "";
+        }
+        private void AdjustTableName(List<Table> TableData)
+        {
+            for (int i = 0, n = TableData.Count; i < n; i++)
+            {
+                // 工作表不可以有 [ ] * / \ : ?
+                TableData[i].TableName = TableData[i].TableName.Replace("[", "［").Replace("]", "］").Replace("*", "＊").Replace("/", "／").Replace("\\", "＼").Replace("?", "？").Replace(":", "：").Replace("'", "、");
+                // 工作表長度限 31 字
+                if (TableData[i].TableName.Length > 31) TableData[i].TableName = TableData[i].TableName.Substring(0, 31);
+            }
+        }
+
+        async private void RenewProgress(int finishCount, double taskCount, string progressID)
+        {
+            var session = accessor.HttpContext.Session;
+            await Task.Run(() =>
+            {
+                session.SetString(progressID, (finishCount / taskCount).ToString());
+                session.CommitAsync();
+            });
+
         }
     }
 }

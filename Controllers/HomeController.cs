@@ -178,6 +178,7 @@ namespace DBSchema.Controllers
         [HttpPost]
         public JsonResult ExportFile([FromBody]Ajax.ExportFile model)
         {
+            HttpContext.Session.SetString(model.ProgressID, "0");
             model.Server = HttpContext.Session.GetString("ServerName");
             model.User = HttpContext.Session.GetString("UserName");
             model.Pwd = HttpContext.Session.GetString("Password");
@@ -211,6 +212,14 @@ namespace DBSchema.Controllers
                 contentType = "application/vnd.ms-excel";
             string fileName = path.Substring(6);
             return File(path, contentType, fileName);
+        }
+
+        [HttpPost]
+        public JsonResult GetProgress([FromBody] string progressID)
+        {
+            if (string.IsNullOrEmpty(progressID) || HttpContext.Session.GetString(progressID) == null) return Json(new { progress = 0 });
+            double percent = Convert.ToDouble(HttpContext.Session.GetString(progressID));
+            return Json(new { progress = percent });
         }
     }
 }

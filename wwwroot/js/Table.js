@@ -314,12 +314,15 @@ function GetColorPicker(id, color) {
 }
 
 function BeforeOpenExportModal() {
-    document.getElementById('exportModal').querySelector('.cy-modal-main').querySelector('button').setAttribute('disabled', true);
+    //document.getElementById('exportModal').querySelector('.cy-modal-main').querySelector('button').setAttribute('disabled', true);
+    document.getElementById('exportModal').querySelector('.cy-modal-main').querySelector('button').removeAttribute('disabled');
     document.getElementById('exportAll').checked = true;
     document.getElementById('exportXlsx').checked = true;
     let field3 = document.getElementById('exportModal').querySelector('fieldset:nth-child(3)');
     field3.querySelectorAll('label')[0].setAttribute('style', 'color:#000000;background-color:#a6e186;');
     field3.querySelectorAll('label')[1].setAttribute('style', 'color:#ff0000;background-color:#ffffff;');
+    document.getElementById('checkTitle').checked = true;
+    document.getElementById('checkSpecial').checked = true;
     document.getElementById('titleFg').value = '#000000';
     document.getElementById('titleBg').value = '#a6e186';
     document.getElementById('specialFg').value = '#ff0000';
@@ -345,15 +348,14 @@ function ExportBtnClick() {
     if (exportType == 'exportChoose') {
         tableid = CyTransfer.GetToValue('listTable');
     }
-    let titleFg = '', titleBg = '', specialFg = '', specialBg = '';
+    let titleColor = '', specialColor = '';
     if (document.getElementById('checkTitle').checked) {
-        titleFg = document.getElementById('titleFg').value;
-        titleBg = document.getElementById('titleBg').value;
+        titleColor = document.getElementById('titleFg').value.substring(1) + document.getElementById('titleBg').value.substring(1);
     }
     if (document.getElementById('checkSpecial').checked) {
-        specialFg = document.getElementById('specialFg').value;
-        specialBg = document.getElementById('specialBg').value;
+        specialColor = document.getElementById('specialFg').value.substring(1) + document.getElementById('specialBg').value.substring(1);
     }
+    let progressID = CyTool.UUID();
     fetch(pathBase + '/Home/ExportFile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -361,10 +363,9 @@ function ExportBtnClick() {
             ExportType: exportType,
             FileType: fileType,
             TableID: tableid,
-            TitleFg: titleFg,
-            TitleBg: titleBg,
-            SpecialFg: specialFg,
-            SpecialBg: specialBg
+            TitleColor: titleColor,
+            SpecialColor: specialColor,
+            ProgressID: progressID
         })
     }).then(res => res.json())
         .then(res => {
@@ -374,6 +375,36 @@ function ExportBtnClick() {
             }
             else CyModal.Alert(res.message, 'L');
         }).catch(err => CyModal.Alert('匯出發生異常'));
+    window.setTimeout(function () {
+        document.getElementById('exportProgress').classList.remove('hidden');
+        document.getElementById('exportProgress').classList.add('show');
+        GetProgress(progressID);
+    }, 100);
+}
+
+function GetProgress(progressID) {
+    fetch(pathBase + '/Home/GetProgress', {
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        body: JSON.stringify(progressID)
+    }).then(res => res.json()).then(res => {
+        if (res.progress < 0) {
+            document.getElementById('exportProgress').classList.add('hidden');
+            document.getElementById('exportProgress').classList.remove('show');
+            return;
+        }
+        if (res.progress < 1) {
+            document.getElementById('exportFinish').style.width = (res.progress * 100) + '%';
+            document.getElementById('exportRemain').style.width = (1 - res.progress) * 100 + '%';
+            window.setTimeout(function () {
+                GetProgress(progressID);
+            }, 100);
+        }
+        else {
+            document.getElementById('exportProgress').classList.add('hidden');
+            document.getElementById('exportProgress').classList.remove('show');
+        }
+    });
 }
 
 function CheckBeforeExport() {
@@ -416,10 +447,15 @@ window.addEventListener('load', function () {
                 else {
                     CyModal.Alert('讀取資料表發生異常：' + res.message );
                 }
-        }).catch(err => CyModal.Alert('讀取資料發生異常：' + err));
+            }).catch(err => CyModal.Alert('讀取資料發生異常：' + err));
+        
     });
     CyModal.Render('editModal', RenderEditModal(), '500*350', '修改資料表描述');
     CyModal.Render('exportModal', RenderExportModal(), '1000*730', '匯出報表檔');
     CyTransfer.Render(transferTable);
+    document.getElementById('btnCloseProgress').addEventListener('click', function () {
+        document.getElementById('exportProgress').classList.add('hidden');
+        document.getElementById('exportProgress').classList.remove('show');
+    });
     document.getElementById('queryTable').focus();
 });

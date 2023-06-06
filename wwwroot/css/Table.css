@@ -37,4 +37,35 @@
 }
 #exportModal fieldset:nth-child(3) > div > input[type="color"]{
     margin-left: 1rem;
-} 
+}
+
+#exportProgress{
+    z-index: 99998;
+    position: absolute;
+    left:50%;
+    top:50%;
+    transform: translate(-50%, -50%);
+    align-items:center;
+    justify-content: center;
+    flex-wrap: wrap;
+    background-color: #ffffff;
+    width: 450px;
+    height: 5rem;
+    padding: 1rem;
+    box-shadow: 0 0 10px #404040;
+    border-radius: 0.4rem;
+}
+#exportFinish {
+    background-color: #5bb5df;
+    height: 1rem;
+}
+#exportRemain {
+    background-color: #fff498;
+    height: 1rem;
+}
+.hidden{
+    display:none;
+}
+.show{
+    display:flex;
+}

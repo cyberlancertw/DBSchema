@@ -80,10 +80,14 @@
             public string ExportType { get; set; }
             public string FileType { get; set; }
             public string[] TableID { get; set; }
-            public string TitleFg { get; set; }
-            public string TitleBg { get; set; }
-            public string SpecialFg { get; set; }
-            public string SpecialBg { get; set; }
+            public string TitleColor { get; set; }
+            public string SpecialColor { get; set; }
+            public string ProgressID { get; set; }
+            public int FinishCount { get; set; }
+            public double TaskCount { get; set; }
+            public List<List<Column>> ColumnData { get; set; }
+            public List<Table> TableData { get; set; }
+            public string FileName { get; set; }
         }
     }
 }

@@ -19,6 +19,11 @@
 <form method="post" action="~/Home/GetFile" id="formFile">
     <input type="hidden" name="token" value="" />
 </form>
+<div class="hidden" id="exportProgress">
+    <div id="exportFinish"></div>
+    <div id="exportRemain"></div>
+    <button class="cy-button btn-red" id="btnCloseProgress"><i data-size="1">cross</i>關閉</button>
+</div>
 <div id="divTop">
     <div id="divCommand">
         <button class="cy-button btn-red" id="btnBack"><i data-size="1">undo</i>返回</button>
