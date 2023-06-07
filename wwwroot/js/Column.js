@@ -52,6 +52,7 @@
                 switch (item.dataType) {
                     case 48: return '0 至 255';
                     case 56: return '-2,147,483,648 至 2,147,483,647';
+                    case 61: return 'yyyy-MM-dd HH:mm:ss';
                     case 104: return '0 至 1';
                     case 167:
                         if (item.dataLength < 0) return '0 至 MAX';
@@ -60,6 +61,10 @@
                         if (item.dataLength < 0) return '0 至 MAX';
                         else return '0 至 ' + item.dataLength / 2;
                     case 239: return item.dataLength / 2;
+                    case 40: return 'yyyy-MM-dd';
+                    case 41: return 'HH:mm:ss';
+                    case 35: return '0 至 65,535 bytes';
+                    case 52: return '-32,768 至 32,767';
                     default: return item.dataLength;
                 }
                 return;
@@ -79,7 +84,15 @@
             DataName: 'isNull',
             Width: 80,
             Getter: function (item) {
-                return item.isNull ? '可' : '不可';
+                if (item.isNull != null && !item.isNull) {
+                    let docFrag = document.createDocumentFragment();
+                    let span = document.createElement('span');
+                    docFrag.appendChild(span);
+                    span.setAttribute('style', 'font-weight:900;color:red;');
+                    span.appendChild(document.createTextNode('不可'));
+                    return docFrag;
+                }
+                return '可';
             }
         },
         {

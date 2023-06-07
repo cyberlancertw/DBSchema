@@ -279,17 +279,9 @@ namespace DBSchema.Models
                 using (var fs = new FileStream(model.FileName, FileMode.Create, FileAccess.Write))
                 {
                     IWorkbook wkBook = new XSSFWorkbook();
-                    ISheet sheet = wkBook.CreateSheet("資料表總覽");
-                    int[] columnWidth = { 7, 11, 11, 15, 15, 15, 15, 10 };
-                    for (int i = 0; i < 8; i++)
-                    {
-                        sheet.SetColumnWidth(i, columnWidth[i] * 256);
-                    }
+
                     XSSFCellStyle styleTitle = (XSSFCellStyle)wkBook.CreateCellStyle();
                     XSSFFont fontTitle = (XSSFFont)wkBook.CreateFont();
-                    XSSFCellStyle styleSpecial = (XSSFCellStyle)wkBook.CreateCellStyle();
-                    XSSFFont fontSpecial = (XSSFFont)wkBook.CreateFont();
-
                     if (useTitleColor)
                     {
                         fontTitle.SetColor(new XSSFColor(new byte[] { Convert.ToByte(model.TitleColor.Substring(0, 2), 16), Convert.ToByte(model.TitleColor.Substring(2, 2), 16), Convert.ToByte(model.TitleColor.Substring(4, 2), 16) }));
@@ -301,12 +293,34 @@ namespace DBSchema.Models
                         fontTitle.FontName = "標楷體";
                         fontTitle.FontHeightInPoints = 12;
                         styleTitle.SetFont(fontTitle);
+                        styleTitle.WrapText = true;
                         styleTitle.BorderLeft = BorderStyle.Thin;
                         styleTitle.BorderBottom = BorderStyle.Thin;
                         styleTitle.BorderRight = BorderStyle.Thin;
                         styleTitle.BorderTop = BorderStyle.Thin;
                         styleTitle.VerticalAlignment = VerticalAlignment.Center;
                     }
+
+                    XSSFCellStyle styleTitleCenter = (XSSFCellStyle)wkBook.CreateCellStyle();
+                    if (useTitleColor)
+                    {
+                        if (!model.TitleColor.Substring(6).ToLower().Equals("ffffff"))
+                        {
+                            styleTitleCenter.FillPattern = FillPattern.SolidForeground;
+                            styleTitleCenter.SetFillForegroundColor(new XSSFColor(new byte[] { Convert.ToByte(model.TitleColor.Substring(6, 2), 16), Convert.ToByte(model.TitleColor.Substring(8, 2), 16), Convert.ToByte(model.TitleColor.Substring(10, 2), 16) }));
+                        }
+                        styleTitleCenter.SetFont(fontTitle);
+                        styleTitleCenter.WrapText = true;
+                        styleTitleCenter.BorderLeft = BorderStyle.Thin;
+                        styleTitleCenter.BorderBottom = BorderStyle.Thin;
+                        styleTitleCenter.BorderRight = BorderStyle.Thin;
+                        styleTitleCenter.BorderTop = BorderStyle.Thin;
+                        styleTitleCenter.VerticalAlignment = VerticalAlignment.Center;
+                        styleTitleCenter.Alignment = HorizontalAlignment.Center;
+                    }
+
+                    XSSFCellStyle styleSpecial = (XSSFCellStyle)wkBook.CreateCellStyle();
+                    XSSFFont fontSpecial = (XSSFFont)wkBook.CreateFont();
                     if (useSpecialColor)
                     {
                         fontSpecial.SetColor(new XSSFColor(new byte[] { Convert.ToByte(model.SpecialColor.Substring(0, 2), 16), Convert.ToByte(model.SpecialColor.Substring(2, 2), 16), Convert.ToByte(model.SpecialColor.Substring(4, 2), 16) }));
@@ -318,205 +332,325 @@ namespace DBSchema.Models
                         fontSpecial.FontName = "標楷體";
                         fontSpecial.FontHeightInPoints = 12;
                         styleSpecial.SetFont(fontSpecial);
+                        styleSpecial.WrapText = true;
                         styleSpecial.BorderLeft = BorderStyle.Thin;
                         styleSpecial.BorderBottom = BorderStyle.Thin;
                         styleSpecial.BorderRight = BorderStyle.Thin;
                         styleSpecial.BorderTop = BorderStyle.Thin;
                         styleSpecial.VerticalAlignment = VerticalAlignment.Center;
                     }
+
+                    XSSFCellStyle styleSpecialCenter = (XSSFCellStyle)wkBook.CreateCellStyle();
+                    if (useSpecialColor)
+                    {
+                        if (!model.SpecialColor.Substring(6).ToLower().Equals("ffffff"))
+                        {
+                            styleSpecialCenter.FillPattern = FillPattern.SolidForeground;
+                            styleSpecialCenter.SetFillForegroundColor(new XSSFColor(new byte[] { Convert.ToByte(model.SpecialColor.Substring(6, 2), 16), Convert.ToByte(model.SpecialColor.Substring(8, 2), 16), Convert.ToByte(model.SpecialColor.Substring(10, 2), 16) }));
+                        }
+                        styleSpecialCenter.SetFont(fontSpecial);
+                        styleSpecialCenter.WrapText = true;
+                        styleSpecialCenter.BorderLeft = BorderStyle.Thin;
+                        styleSpecialCenter.BorderBottom = BorderStyle.Thin;
+                        styleSpecialCenter.BorderRight = BorderStyle.Thin;
+                        styleSpecialCenter.BorderTop = BorderStyle.Thin;
+                        styleSpecialCenter.VerticalAlignment = VerticalAlignment.Center;
+                        styleSpecialCenter.Alignment = HorizontalAlignment.Center;
+                    }
+
                     ICellStyle styleNormal = wkBook.CreateCellStyle();
                     IFont fontNormal = wkBook.CreateFont();
                     fontNormal.FontName = "標楷體";
                     fontNormal.FontHeightInPoints = 12;
                     styleNormal.SetFont(fontNormal);
+                    styleNormal.WrapText = true;
                     styleNormal.BorderLeft = BorderStyle.Thin;
                     styleNormal.BorderBottom = BorderStyle.Thin;
                     styleNormal.BorderRight = BorderStyle.Thin;
                     styleNormal.BorderTop = BorderStyle.Thin;
                     styleNormal.VerticalAlignment = VerticalAlignment.Center;
 
+                    ICellStyle styleNormalCenter = wkBook.CreateCellStyle();
+                    styleNormalCenter.SetFont(fontNormal);
+                    styleNormalCenter.WrapText = true;
+                    styleNormalCenter.BorderLeft = BorderStyle.Thin;
+                    styleNormalCenter.BorderBottom = BorderStyle.Thin;
+                    styleNormalCenter.BorderRight = BorderStyle.Thin;
+                    styleNormalCenter.BorderTop = BorderStyle.Thin;
+                    styleNormalCenter.VerticalAlignment = VerticalAlignment.Center;
+                    styleNormalCenter.Alignment = HorizontalAlignment.Center;
+
+                    ISheet sheet = wkBook.CreateSheet("資料表總覽");
+                    int[] columnWidth = { 7, 28, 60 };
+                    for (int i = 0; i < 3; i++)
+                    {
+                        sheet.SetColumnWidth(i, columnWidth[i] * 256);
+                    }
+
                     int rowIndex = 0;
                     IRow row = sheet.CreateRow(rowIndex);
                     row.Height = 2 * 256;
-                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 1));
-                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
-                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 6, 7));
 
                     ICell cell = row.CreateCell(0);
-                    cell.CellStyle = styleNormal;
-                    cell.SetCellValue("資料庫名稱");
+                    if (useTitleColor)
+                    {
+                        cell.CellStyle = styleTitleCenter;
+                        cell.SetCellValue("序號");
 
-                    cell = row.CreateCell(2);
+                        cell = row.CreateCell(1);
+                        cell.CellStyle = styleTitle;
+                        cell.SetCellValue("資料庫名稱");
+
+                        cell = row.CreateCell(2);
+                        cell.CellStyle = styleTitle;
+                        cell.SetCellValue("製表時間");
+                    }
+                    else
+                    {
+                        cell.CellStyle = styleNormalCenter;
+                        cell.SetCellValue("序號");
+
+                        cell = row.CreateCell(1);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue("資料庫名稱");
+
+                        cell = row.CreateCell(2);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue("製表時間");
+                    }
+
+                    rowIndex++;
+                    row = sheet.CreateRow(rowIndex);
+                    row.Height = 2 * 256;
+                    cell = row.CreateCell(0);
+                    cell.CellStyle = styleNormalCenter;
+                    cell.SetCellValue(0);
+
+                    cell = row.CreateCell(1);
                     cell.CellStyle = styleNormal;
                     cell.SetCellValue(model.Catalog);
 
-                    cell = row.CreateCell(5);
-                    cell.CellStyle = styleNormal;
-                    cell.SetCellValue("製表時間");
-
-                    cell = row.CreateCell(6);
+                    cell = row.CreateCell(2);
                     cell.CellStyle = styleNormal;
                     cell.SetCellValue(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
+                    //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 1));
+                    //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
+                    //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 6, 7));
+
                     rowIndex += 2;
                     row = sheet.CreateRow(rowIndex);
+
                     row.Height = 2 * 256;
-                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
-                    sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
 
                     if (useTitleColor)
                     {
                         cell = row.CreateCell(0);
-                        cell.CellStyle = styleTitle;
+                        cell.CellStyle = styleTitleCenter;
                         cell.SetCellValue("序號");
+
                         cell = row.CreateCell(1);
                         cell.CellStyle = styleTitle;
                         cell.SetCellValue("資料表名稱");
-                        cell = row.CreateCell(3);
+
+                        cell = row.CreateCell(2);
                         cell.CellStyle = styleTitle;
                         cell.SetCellValue("資料表描述");
-                        cell = row.CreateCell(7);
-                        cell.CellStyle = styleTitle;
-                        cell.SetCellValue("欄位數量");
+                        
+                        //cell = row.CreateCell(7);
+                        //cell.CellStyle = styleTitle;
+                        //cell.SetCellValue("欄位數量");
                     }
                     else
                     {
                         cell = row.CreateCell(0);
-                        cell.CellStyle = styleNormal;
+                        cell.CellStyle = styleNormalCenter;
                         cell.SetCellValue("序號");
+
                         cell = row.CreateCell(1);
                         cell.CellStyle = styleNormal;
                         cell.SetCellValue("資料表名稱");
-                        cell = row.CreateCell(3);
+
+                        cell = row.CreateCell(2);
                         cell.CellStyle = styleNormal;
                         cell.SetCellValue("資料表描述");
-                        cell = row.CreateCell(7);
-                        cell.CellStyle = styleNormal;
-                        cell.SetCellValue("欄位數量");
-                    }                    
+
+                        //cell = row.CreateCell(3);
+                        //cell.CellStyle = styleNormal;
+                        //cell.SetCellValue("欄位數量");
+                    }
+
+                    //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
+                    //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
 
                     for (int i = 0, n = model.TableData.Count; i < n; i++)
                     {
                         Table table = model.TableData[i];
                         rowIndex++;
                         row = sheet.CreateRow(rowIndex);
-                        row.Height = 2 * 256;
-                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
-                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
+                        
+                        row.Height = (short)((2 + CountBreakLine(table.Description)) * 256);
+                        //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
+                        //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 6));
 
                         cell = row.CreateCell(0);
-                        cell.CellStyle = styleNormal;
+                        cell.CellStyle = styleNormalCenter;
                         cell.SetCellValue(i + 1);
 
                         cell = row.CreateCell(1);
                         cell.CellStyle = styleNormal;
                         cell.SetCellValue(table.TableName);
 
-                        cell = row.CreateCell(3);
+                        cell = row.CreateCell(2);
                         cell.CellStyle = styleNormal;
                         cell.SetCellValue(table.Description);
 
-                        cell = row.CreateCell(7);
-                        cell.CellStyle = styleNormal;
-                        cell.SetCellValue(table.ColumnCount);
+                        //cell = row.CreateCell(3);
+                        //cell.CellStyle = styleNormal;
+                        //cell.SetCellValue(table.ColumnCount);
                     }
 
-
                     RenewProgress(++model.FinishCount, model.TaskCount, model.ProgressID);
+
+                    int[] detailColumnWidth = { 7, 28, 50, 12, 20, 9, 7, 7, 10, 7 };
+
                     for (int i = 0, n = model.TableData.Count; i < n; i++)
                     {
-                        
+                        Table table = model.TableData[i];
                         sheet = wkBook.CreateSheet(model.TableData[i].TableName);
+                        
+                        for (int j = 0; j < 10; j++)
+                        {
+                            sheet.SetColumnWidth(j, detailColumnWidth[j] * 256);
+                        }
                         rowIndex = 0;
                         row = sheet.CreateRow(rowIndex);
-                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 1));
-                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
-                        cell = row.CreateCell(0);
-                        cell.CellStyle = styleNormal;
-                        cell.SetCellValue("資料表名稱");
-
-                        cell = row.CreateCell(2);
-                        cell.CellStyle = styleNormal;
-                        cell.SetCellValue(model.TableData[i].TableName);
-
-                        rowIndex += 2;
-                        row = sheet.CreateRow(rowIndex);
-                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
-                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 5));
-                        sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 7, 8));
+                        row.Height = 2 * 256;
+                        //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, 1));
+                        //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 2, 4));
                         if (useTitleColor)
                         {
                             cell = row.CreateCell(0);
+                            cell.CellStyle = styleTitleCenter;
+                            cell.SetCellValue("序號");
+
+                            cell = row.CreateCell(1);
                             cell.CellStyle = styleTitle;
+                            cell.SetCellValue("資料表名稱");
+
+                            cell = row.CreateCell(2);
+                            cell.CellStyle = styleTitle;
+                            cell.SetCellValue("資料表描述");
+                        }
+                        else
+                        {
+                            cell = row.CreateCell(0);
+                            cell.CellStyle = styleNormalCenter;
+                            cell.SetCellValue("序號");
+
+                            cell = row.CreateCell(1);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("資料表名稱");
+
+                            cell = row.CreateCell(2);
+                            cell.CellStyle = styleNormal;
+                            cell.SetCellValue("資料表描述");
+                        }
+
+                        rowIndex++;
+                        row = sheet.CreateRow(rowIndex);
+                        row.Height = (short)((2 + CountBreakLine(table.Description)) * 256);
+                        cell = row.CreateCell(0);
+                        cell.CellStyle = styleNormalCenter;
+                        cell.SetCellValue(0);
+
+                        cell = row.CreateCell(1);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue(table.TableName);
+
+                        cell = row.CreateCell(2);
+                        cell.CellStyle = styleNormal;
+                        cell.SetCellValue(table.Description);
+
+                        rowIndex += 2;
+                        row = sheet.CreateRow(rowIndex);
+                        row.Height = 2 * 256;
+                        //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
+                        //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 5));
+                        //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 7, 8));
+                        if (useTitleColor)
+                        {
+                            cell = row.CreateCell(0);
+                            cell.CellStyle = styleTitleCenter;
                             cell.SetCellValue("序號");
                             cell = row.CreateCell(1);
                             cell.CellStyle = styleTitle;
                             cell.SetCellValue("欄位名稱");
-                            cell = row.CreateCell(3);
+                            cell = row.CreateCell(2);
                             cell.CellStyle = styleTitle;
                             cell.SetCellValue("欄位描述");
-                            cell = row.CreateCell(6);
-                            cell.CellStyle = styleTitle;
-                            cell.SetCellValue("欄位類型");
-                            cell = row.CreateCell(7);
-                            cell.CellStyle = styleTitle;
-                            cell.SetCellValue("欄位範圍");
-                            cell = row.CreateCell(9);
-                            cell.CellStyle = styleTitle;
+                            cell = row.CreateCell(3);
+                            cell.CellStyle = styleTitleCenter;
+                            cell.SetCellValue("資料類型");
+                            cell = row.CreateCell(4);
+                            cell.CellStyle = styleTitleCenter;
+                            cell.SetCellValue("範圍");
+                            cell = row.CreateCell(5);
+                            cell.CellStyle = styleTitleCenter;
                             cell.SetCellValue("預設值");
-                            cell = row.CreateCell(10);
-                            cell.CellStyle = styleTitle;
+                            cell = row.CreateCell(6);
+                            cell.CellStyle = styleTitleCenter;
                             cell.SetCellValue("空值");
-                            cell = row.CreateCell(11);
-                            cell.CellStyle = styleTitle;
+                            cell = row.CreateCell(7);
+                            cell.CellStyle = styleTitleCenter;
                             cell.SetCellValue("索引");
-                            cell = row.CreateCell(12);
-                            cell.CellStyle = styleTitle;
+                            cell = row.CreateCell(8);
+                            cell.CellStyle = styleTitleCenter;
                             cell.SetCellValue("自動遞增");
-                            cell = row.CreateCell(13);
-                            cell.CellStyle = styleTitle;
+                            cell = row.CreateCell(9);
+                            cell.CellStyle = styleTitleCenter;
                             cell.SetCellValue("主鍵");
                         }
                         else
                         {
                             cell = row.CreateCell(0);
-                            cell.CellStyle = styleNormal;
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue("序號");
 
                             cell = row.CreateCell(1);
                             cell.CellStyle = styleNormal;
                             cell.SetCellValue("欄位名稱");
 
-                            cell = row.CreateCell(3);
+                            cell = row.CreateCell(2);
                             cell.CellStyle = styleNormal;
                             cell.SetCellValue("欄位描述");
 
-                            cell = row.CreateCell(6);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(3);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue("資料類型");
 
-                            cell = row.CreateCell(7);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(4);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue("範圍");
 
-                            cell = row.CreateCell(9);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(5);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue("預設值");
 
-                            cell = row.CreateCell(10);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(6);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue("空值");
 
-                            cell = row.CreateCell(11);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(7);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue("索引");
 
-                            cell = row.CreateCell(12);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(8);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue("自動遞增");
 
-                            cell = row.CreateCell(13);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(9);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue("主鍵");
                         }
                         for (int s = 0, t = model.ColumnData[i].Count; s < t; s++)
@@ -524,61 +658,62 @@ namespace DBSchema.Models
                             rowIndex++;
                             Column column = model.ColumnData[i][s];
                             row = sheet.CreateRow(rowIndex);
-                            sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
-                            sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 5));
-                            sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 7, 8));
+                            row.Height = (short)((2 + CountBreakLine(column.Description)) * 256);
+                            //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 1, 2));
+                            //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 3, 5));
+                            //sheet.AddMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 7, 8));
 
                             cell = row.CreateCell(0);
-                            cell.CellStyle = styleNormal;
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue(s + 1);
 
                             cell = row.CreateCell(1);
                             cell.CellStyle = styleNormal;
                             cell.SetCellValue(column.ColumnName);
 
-                            cell = row.CreateCell(3);
+                            cell = row.CreateCell(2);
                             cell.CellStyle = styleNormal;
                             cell.SetCellValue(column.Description);
 
-                            cell = row.CreateCell(6);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(3);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue(GetDataType(column));
 
-                            cell = row.CreateCell(7);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(4);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue(GetDataLength(column));
 
-                            cell = row.CreateCell(9);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(5);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue(GetDefaultValue(column));
 
-                            cell = row.CreateCell(10);
+                            cell = row.CreateCell(6);
                             if(useSpecialColor && !column.IsNull)
                             {
-                                cell.CellStyle = styleSpecial;
+                                cell.CellStyle = styleSpecialCenter;
                             }
                             else
                             {
-                                cell.CellStyle = styleNormal;
+                                cell.CellStyle = styleNormalCenter;
                             }
                             cell.SetCellValue(GetIsNull(column));
 
-                            cell = row.CreateCell(11);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(7);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue(GetIndex(column));
 
-                            cell = row.CreateCell(12);
-                            cell.CellStyle = styleNormal;
+                            cell = row.CreateCell(8);
+                            cell.CellStyle = styleNormalCenter;
                             cell.SetCellValue(GetIdentity(column));
 
-                            cell = row.CreateCell(13);
+                            cell = row.CreateCell(9);
                             if (useSpecialColor && column.IsPrimaryKey)
                             {
-                                cell.CellStyle = styleSpecial;
+                                cell.CellStyle = styleSpecialCenter;
                             }
                             else
                             {
-                                cell.CellStyle = styleNormal;
+                                cell.CellStyle = styleNormalCenter;
                             }
                             cell.SetCellValue(GetPrimaryKey(column));                            
                         }
@@ -599,11 +734,15 @@ namespace DBSchema.Models
         public void ExportPDF(Ajax.ExportFile model, SqlInfo info)
         {
             model.FileName += ".pdf";
+            info.StringData = model.FileName;
+            info.Message = "工事中";
         }
 
         public void ExportDOCX(Ajax.ExportFile model, SqlInfo info)
         {
             model.FileName += ".docx";
+            info.StringData = model.FileName;
+            info.Message = "工事中";
         }
 
         public void ExportCSV(Ajax.ExportFile model, SqlInfo info)
@@ -623,6 +762,7 @@ namespace DBSchema.Models
                     }
                     fs.Write(Encoding.UTF8.GetBytes(builder.ToString()));
                 }
+                info.StringData = model.FileName;
                 info.Success = true;
             }
             catch (Exception e)
@@ -724,6 +864,7 @@ namespace DBSchema.Models
             {
                 case 48: return "0 至 255";
                 case 56: return "-2,147,483,648 至 2,147,483,647";
+                case 61: return "yyyy-MM-dd HH:mm:ss";
                 case 104: return "0 至 1";
                 case 167:
                     if (item.DataLength < 0) return "0 至 MAX";
@@ -732,6 +873,10 @@ namespace DBSchema.Models
                     if (item.DataLength < 0) return "0 至 MAX";
                     else return "0 至 " + item.DataLength / 2;
                 case 239: return (item.DataLength / 2).ToString();
+                case 40: return "yyyy-MM-dd";
+                case 41: return "HH:mm:ss";
+                case 35: return "0 至 65,535 bytes";
+                case 52: return "-32,768 至 32,767";
                 default: return item.DataLength.ToString();
             }
         }
@@ -771,6 +916,16 @@ namespace DBSchema.Models
             }
         }
 
+        private int CountBreakLine(string data)
+        {
+            if (string.IsNullOrEmpty(data)) return 0;
+            int count = 0;
+            for (int i = 0, l = data.Length; i < l; i++)
+            {
+                if (data[i] == '\n') count++;
+            }
+            return count;
+        }
         async private void RenewProgress(int finishCount, double taskCount, string progressID)
         {
             var session = accessor.HttpContext.Session;
